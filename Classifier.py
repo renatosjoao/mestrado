@@ -59,7 +59,6 @@ def append_to_matrix(matrix1,matrix1_ncolumn, freq0, freq1):
 
    :Return: numpy matrix with appended columns of freq0 and freq1
 
-
     >>> Wpattern, freq0, freq1
     >>> '0,0,0,0, 200, 50'
 
@@ -102,9 +101,125 @@ def alpha_factor(epsilon_t):
     alpha_t = 0.5*(np.log((1.0-epsilon_t)/epsilon_t))
     return alpha_t
 
+def betha_factor(epsilon_t):
+    """ This is a function to calculate the betha_t factor
+
+    :Input:
+     `epsilon_t` : Error for the current iteraction
+
+    :Return:
+     `betha_t`:
+     """
+    betha_t = epsilon_t / (1.0 - epsilon_t)
+    return betha_t
+
+def create_freq_Table(Matrix):
+    """ This is a function to create a frequency table from the input Matrix.
+
+    :Input:
+     `Matrix` : It is the original matrix with freq0 and freq1 columns.
+       '[Wpattern, freq0, freq1]'
+       '[0,0,0,0, 200, 50]'
+
+    :Output:
+     `freqTable` : It returns the table with the frequncy (weights) for labels 0 and 1
+
+        >>>
+        >>> [Wpattern, w0, w1]
+        >>> [0,0,0,0, 0.25, 0.0]
+        >>> [0,0,0,1, 0.0, 0.125]
+        >>> [0,0,1,1, 0.125, 0.5]
+    """
+    freqTable = Matrix.astype('double')
+    freqTable[:,-1] = Matriz_t1[:,-1]/freq_sum(Matriz_t1)[1]
+    freqTable[:,-2] = Matriz_t1[:,-2]/freq_sum(Matriz_t1)[0]
+    return freqTable
+
+def make_decision(Table):
+    """ This is a utility function to make a decision for each pattern
+    based on w0 (weight for label 0 ) and w1(weight for label 1).It takes as
+    input the table with w0 and w1 frequencies, compare those values and make a decision.
+    After it makes the decision it adds the label to the last table column respectively.
+
+    :Input:
+     `Table` : It takes the input table with w0 and w1 frequencies
+
+    :Output:
+     `Taux` : This is the table with w0 and w1 frequencies plus the decision label
+     at the last column.
+
+     >>> i.e.
+     >>>[ 0.   0.   0.   0.   0.5  0.6  1. ]
+     >>>[ 0.   0.   0.   0.   0.2  0.3  1. ]
+
+    """
+    i=0
+    ### Ainda estou na d[u]vida se adiciono a coluna de decisao na Tabela original
+    Taux = np.array(())
+    ### Se for adicionar a decisao devo usar o Taux abaixo
+    #Taux = np.zeros((Table.shape[0],Table.shape[1]+1))
+    for row in Table:
+        if row[-2] > row[-1]:
+            Taux =  np.append(Taux,[0])
+            #Taux[i] = np.hstack((row,0))
+        if row[-2] < row[-1]:
+            Taux =  np.append(Taux,[1])
+           #Taux[i] = np.hstack((row,1))
+        if row[-2] == row[-1]:
+            Taux =  np.append(Taux,[0])
+           #Taux[i] = np.hstack((row,0))
+        i = i + 1
+    return Taux
+
+def sel_car(Table):
+    """ A function to feature selection procedure
+    As it is not implemented yet it is returning a pre-set numpy array of indexes.
+    subset = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
+    """
+    subset = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
+    return subset
+
+#TODO:
+def update_Table(Table,alpha_t):
+
+    #w_i^{t+1} = w_i^t*betha_t^( 1- | h(xi) - yi | )
+
+    for row in Table:
+        print""
+    return 0
 
 
+if __name__ == "__main__":
+    #main()
 
+    Matriz =  read_from_XPL(XPL_file_path)
+    w0Sum =  Matriz.freq0.sum()
+    w0Sum = w0Sum.astype('double')
+    w1Sum =  Matriz.freq1.sum()
+    w1Sum = w1Sum.astype('double')
+    Matriz_t1 = append_to_matrix(Matriz.data,Matriz.data.shape[1],Matriz.freq0,Matriz.freq1)
+    Matriz_t1 = Matriz_t1.astype('double')
+
+    Table = np.array(([0,0,0,0,0.5,0.6],
+                      [0,0,0,0,0.2,0.3],
+                      [0,0,1,0,0.3,0.4],
+                      [0,0,1,0,0.4,0.5],
+                      [0,0,0,1,0.1,0.1],
+                      [0,0,0,1,0.5,0.6],
+                      [0,1,0,0,0.9,0.7],
+                      [0,0,1,0,0.4,0.3],
+                      [0,1,1,0,0.7,0.6] ))
+
+freqTable = create_freq_Table(Matriz_t1)
+print freqTable
+error_t = error(freqTable,0)
+print alpha_factor(error_t)
+print betha_factor(error_t)
+    #for t in range(10):
+    #    print ""
+#print Table[:,:-2]
+#print np.min((row[-2],row[-1]))
+#print np.append(Table[0],[4,5,6])
 
 #TODO:
 #def create_empy_hash_table():
@@ -150,26 +265,32 @@ def alpha_factor(epsilon_t):
 
 
 ####You use the built-in int() function, and pass it the base of the input number, i.e. 2 for a binary number.
+#Matriz =  read_from_XPL(XPL_file_path)
+#w0Sum =  Matriz.freq0.sum()
+#w0Sum = w0Sum.astype('double')
+#w1Sum =  Matriz.freq1.sum()
+#w1Sum = w1Sum.astype('double')
+#Matriz_t1 = append_to_matrix(Matriz.data,Matriz.data.shape[1],Matriz.freq0,Matriz.freq1)
+#Matriz_t1 = Matriz_t1.astype('double')
 
-
-Matriz =  read_from_XPL(XPL_file_path)
-w0Sum =  Matriz.freq0.sum()
-w0Sum = w0Sum.astype('double')
-w1Sum =  Matriz.freq1.sum()
-w1Sum = w1Sum.astype('double')
-Matriz_t1 = append_to_matrix(Matriz.data,Matriz.data.shape[1],Matriz.freq0,Matriz.freq1)
-Matriz_t1 = Matriz_t1.astype('double')
-
-
+#print Matriz_t1[0]
+#MM = Matriz_t1.astype('double')
+#Matriz_t1[:,-1]/freq_sum(Matriz_t1)[0]
+#MM[:,-1] = Matriz_t1[:,-1]/freq_sum(Matriz_t1)[1]
+#MM[:,-2] = Matriz_t1[:,-2]/freq_sum(Matriz_t1)[0]
+#Matriz_t1[:,-1] = Matriz_t1[:,-1]/freq_sum(Matriz_t1)[0]
+#Matriz_t1 = Matriz_t1.astype('double')
+#print Matriz_t1[:,-2]
+#print MM[8]
 
 
 #for testing purposes
-Table = np.array(([0,0,0.1,0.2],
-                [0,1,0.075,0.225],
-                [1,0,0.1,0.075],
-                [1,1, 0.125, 0.1]))
-
-print alpha_factor(error(Table,0))
+#Table = np.array(([0,0,0.1,0.2],
+#               [0,1,0.075,0.225],
+#               [1,0,0.1,0.075],
+#               [1,1, 0.125, 0.1]))
+#
+#print alpha_factor(error(Table,0))
 #for row in Matriz_t1:
 #    print row
 #print Matriz_t1
@@ -181,7 +302,6 @@ print alpha_factor(error(Table,0))
 #print dec_from_matrixRow(Matriz.data[2])
 #build_dict()
 
-
 #TODO:
 #def norm():
 #    """ This is a function to calculate the normalizing value """
@@ -189,15 +309,23 @@ print alpha_factor(error(Table,0))
     #return norm
     #np.exp()
 
-
+#def unique_rows(data):
+#    unique = dict()
+#    for row in data:
+#        row = tuple(row)
+#
+#        if row in unique:
+#            unique[row] += 1
+#        else:
+#            unique[row] = 1
+#    return unique
 
 #TODO:
 def resample(Table, Subset):
     """ function to resample """
     return 0
 
-#TODO:
-#def update_Table():
+
 
 #def train_classifier():
 
@@ -205,12 +333,6 @@ def resample(Table, Subset):
 
 #def apply_classifier():    
 
-
-
-#def sel_car(Wpattern, w0, w1):
-#    """ A function to feature selection """
-#
-#    return subset
 
 #M = np.array([[0,0,0,3,5],[0,0,1,2,5],[0,1,0,3,2],[0,1,1,2,4],[1,0,0,3,1],[1,1,0,5,1],[1,1,1,1,0]])
 #
