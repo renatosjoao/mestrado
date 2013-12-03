@@ -12,6 +12,7 @@ __license__ = "Python"
 
 import numpy as np 
 import xplutil as xplutil
+from sklearn.ensemble import AdaBoostClassifier
 
 XPL_file_path = '/home/rsjoao/Dropbox/projetoMestrado/codigo/DRIVE/training set/drive7'
 CSV_file_path= ''
@@ -155,6 +156,7 @@ def make_decision(Table):
     """
     i=0
     ### Ainda estou na d[u]vida se adiciono a coluna de decisao na Tabela original
+    ### ou se mantenho uma tabela de 1 coluna com as decisoes
     Taux = np.array(())
     ### Se for adicionar a decisao devo usar o Taux abaixo
     #Taux = np.zeros((Table.shape[0],Table.shape[1]+1))
@@ -180,14 +182,41 @@ def sel_car(Table):
     return subset
 
 #TODO:
-def update_Table(Table,alpha_t):
-
+def update_Table(Table,alpha_t):#betha
     #w_i^{t+1} = w_i^t*betha_t^( 1- | h(xi) - yi | )
-
     for row in Table:
-        print""
-    return 0
+        if row[-1] < row[-2]:
+            row[-1] = row[-1]
+            row[-2] = row[-2]*betha
+        else:
+            row[-2] = row[-2]
+            row[-1] = row[-1]*betha
 
+    #D_{t+1}(xi) = D_t(xi)*exp(alpha_t ( 2* I (y_i != h_t(x_i)) -1 ))
+    for row in Table:
+        row[-1] = row[-1] * np.exp(alpha_t)
+        row[-1] = row[-1] * np.exp(-1)
+    return Table
+
+def normalize_Table(Table):
+    """ This is just a utility function to normalize the table
+
+    Parameters
+    ----------
+    Table : array-like of shape = [n,m]
+            The input table that will be normalized
+
+    Returns
+    -------
+    Table : array-like of shape = [n,m]
+            The same table, normalized though.
+    """
+
+    total = np.sum(Table[:,[-2,-1]])
+    for row in Table:
+        row[-1] = row[-1]/total
+        row[-2] = row[-2]/total
+    return Table
 
 if __name__ == "__main__":
     #main()
@@ -211,10 +240,13 @@ if __name__ == "__main__":
                       [0,1,1,0,0.7,0.6] ))
 
 freqTable = create_freq_Table(Matriz_t1)
-print freqTable
+#print freqTable
 error_t = error(freqTable,0)
-print alpha_factor(error_t)
-print betha_factor(error_t)
+#print alpha_factor(error_t)
+betha = betha_factor(error_t)
+#print betha_factor(error_t)
+print np.exp(-1)
+
     #for t in range(10):
     #    print ""
 #print Table[:,:-2]
