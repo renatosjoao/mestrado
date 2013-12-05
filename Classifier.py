@@ -189,44 +189,44 @@ def sel_car(Table):
     subset = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
     return subset
 
-#TODO:
-def update_Table(Table,betha_t,w0,w1):#betha
+def update_Table(w0,w1,betha_t,decTable):#betha
     """ This is just a utility function to update the table
     of weights given the alpha_t value
 
     Parameters
     ----------
-    Table : array-like of shape = [n,m]. The input table to be updated.
-
-    betha_t: double value that will be used to update the weights in the
-    frequency table.
-
     w0 : array-like of shape = [n, 1]
         Label 0 frequency table.
 
     w1 : array-like of shape = [n, 1]
         Label 1 frequency table.
 
+    betha_t: double value.
+        That value will be used to update the weights in the
+        frequency table.
+
+    decTable : array-like of shape = [n,1].
+        The input decision table.
+
     Returns
     -------
-    Table : array-like of shape = [n,m].
-            The table with updated weights
+    w0 : array-like of shape = [n, 1]
+        Label 0 frequency table updated.
+
+    w1 : array-like of shape = [n, 1]
+        Label 1 frequency table updated.
 
     """
-    for row in Table:
-    #w_i^{t+1} = w_i^t*betha_t^( 1- | h(xi) - yi | )
-        if row[-1] < row[-2]:
-            row[-1] = row[-1]
-            row[-2] = row[-2]*betha_t
+    t = 0
+    for i,j,k in zip(w0,w1,decTable):
+        if k == 0:
+            w0[t] = i * 2
+            w1[t] = w1[t] * 1
         else:
-            row[-2] = row[-2]
-            row[-1] = row[-1]*betha_t
-
-    #D_{t+1}(xi) = D_t(xi)*exp(alpha_t ( 2* I (y_i != h_t(x_i)) -1 ))
-    for row in Table:
-        row[-1] = row[-1] * np.exp(betha_t)
-        row[-1] = row[-1] * np.exp(-1)
-    return Table
+            w1[t] = j * 2
+            w0[t] = w0[t] * 1
+        t = t +1
+    return w0, w1
 
 if __name__ == "__main__":
     #main()
@@ -249,9 +249,9 @@ if __name__ == "__main__":
                       [0,0,1,0,0.4,0.3],
                       [0,1,1,0,0.7,0.6] ))
 
-A = np.array(([0.3],[0.09],[0.3]))
-B = np.array(([0.1],[0.3],[0.15]))
-print make_decision(A,B)
+A = np.array(([0.2],[0.3],[0.4]))
+B = np.array(([0.1],[0.2],[0.2]))
+
 #freqTable = create_freq_Table(Matriz_t1)
 #print freqTable
 #error_t = error(freqTable,0)
