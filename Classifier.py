@@ -12,167 +12,175 @@ __license__ = "Python"
 
 import numpy as np 
 import xplutil as xplutil
-from sklearn.ensemble import AdaBoostClassifier
+
 
 XPL_file_path = '/home/rsjoao/Dropbox/projetoMestrado/codigo/DRIVE/training set/drive7'
 CSV_file_path= ''
 
+
 def read_from_XPL(XPL_file_path):
-    """ xplutil.py already reads from XPL file.
-    
-    :Input:
-        `file_path` : path to the xpl file
-     
-     Result: 
-         `matrix_read` : numpy matrix read from XPL file
-    """
-    matrix_read = xplutil.read_xpl(XPL_file_path)    
-    return matrix_read    
-    
-def freq_sum(Matrix):
-    """ This function is meant to sum all the elements for the freq0 and freq1
-    columns.
+    """xplutil.py already reads from XPL file.
 
-    :Input:
-     `Matrix` : The input matrix must be in the following format
-         [Wpattern, freq0, freq1]
-         [0,0,0,0, 200, 50]
-    :Output:
-     `[freq0.sum(), freq1.sum()]` :
+    Parameters
+    ----------
+    XPL_file_path : '/home/jdoe/path_to_xpl'
+                    The path to the XPL file.
+
+    Returns
+    -------
+    result : ExampleData(data, freq0, freq1, winshape, windata, filename)
+            Same as xplutil returns.
 
     """
-    aux = np.sum(Matrix,axis=0)
-    aux = aux.astype('double')
-    return [aux[-2],aux[-1]]
-    
-def append_to_matrix(matrix1,matrix1_ncolumn, freq0, freq1):
+    result = xplutil.read_xpl(XPL_file_path)
+    return result
 
-    """ This function is meant to gather the window patterns and labels (0,1)
-    frequencies into a single table.  Each row from freq0 matrix is appended to
-    each respective row from matrix1 and each row from freq1 is appended to
-    each respective row from matrix1.
+def freq_sum(w0, w1):
+    """ This function is meant to sum all the elements from w0 and  w1.
 
-   :Input:
-    `matrix1`: It is supposed to be a matrix read from xpl, i.e. matrix1 = matrix_read.data
-    `matrix1_ncolumn`: It represents the number of columns from matrix1, i.e. matrix_read.data.shape[1]
-    `freq0`: freq0 is a matrix of labels 0 frequencies, i.e.  matrix_read.freq0
-    `freq1`: freq1 is a matrix of labels 1 frequencies, i.e.  matrix_read.freq1
+    Parameters
+    ----------
+    w0 : array-like of shape = [n, 1]
+        Label 0 frequency table.
 
-   :Return: numpy matrix with appended columns of freq0 and freq1
+    w1 : array-like of shape = [n, 1]
+        Label 1 frequency table.
 
-    >>> Wpattern, freq0, freq1
-    >>> '0,0,0,0, 200, 50'
+    Returns
+    -------
+    np.sum([w0,w1]) : double value
+        Returns the sum for all w0,w1 values.
 
-   """
-    ###NOTE: data read from xplutil is uint8. Must convert to int64 or append wont work
-    matrix1 = matrix1.astype('int64')
-    freq0 = freq0.astype('int64')
-    freq1 = freq1.astype('int64')
-    aux_matrix = np.insert(matrix1,matrix1_ncolumn,values=freq0,axis=1)
-    aux_matrix = np.insert(aux_matrix,matrix1_ncolumn+1,values=freq1, axis=1)
-    return aux_matrix
+    """
+    return np.sum([w0,w1])
 
-def error(Table, t):
-    """ This is a function to calculate the error for the t interaction
+def error(w0, w1):
+    """ This is a function to calculate the error for the current interaction
 
-    :Input:
-     `Table` : Matrix after feature selection with weights w0 and w1  i.e. [0, 1, 1, 0.075, 0.1]
+    Parameters
+    ----------
+    w0 : array-like of shape = [n, 1]
+        Label 0 frequency table.
 
-    :Return:
-     `epsilon_t`: This is the error value for the current iteraction
+    w1 : array-like of shape = [n, 1]
+        Label 1 frequency table.
+
+    Returns
+    -------
+    epsilon_t : double
+        The error value for the current iteraction.
+
     """
     epsilon_t = 0.0
-    for row in Table:
-        #row[-2] is the column that represents w0
-        #row[-1] is the column that represents w1
-        epsilon_t = epsilon_t + np.min((row[-2],row[-1]))
-        #epsilon_t = SUM D_t(x_i) I(y_i != h_t(x_i))
+    for a,b in zip(w0,w1):
+        if a < b:
+            epsilon_t = epsilon_t + a
+        elif b < a:
+            epsilon_t = epsilon_t + b
+        else:
+            epsilon_t = epsilon_t + a
     return epsilon_t
-
-
-def alpha_factor(epsilon_t):
-    """ This is a function to calculate the alpha_t factor
-
-    :Input:
-     `epsilon_t : Error for the current iteraction
-
-    :Return:
-     `alphta_t` : It is the alpha factor for the current iteraction
-    """
-    alpha_t = 0.5*(np.log((1.0-epsilon_t)/epsilon_t))
-    return alpha_t
 
 def betha_factor(epsilon_t):
     """ This is a function to calculate the betha_t factor
 
-    :Input:
-     `epsilon_t` : Error for the current iteraction
+    Parameters
+    ----------
+    epsilon_t : double
+        Error for the current iteraction.
 
-    :Return:
-     `betha_t`:
+    Returns
+    -------
+     betha_t : double
+         Betha value for the current iteraction
+
      """
     betha_t = epsilon_t / (1.0 - epsilon_t)
     return betha_t
 
-def create_freq_Table(Matrix):
-    """ This is a function to create a frequency table from the input Matrix.
+def create_freq_Table(freq0, freq1):
+    """ This is a function to create a frequency table.
 
-    :Input:
-     `Matrix` : It is the original matrix with freq0 and freq1 columns.
-       '[Wpattern, freq0, freq1]'
-       '[0,0,0,0, 200, 50]'
+    Parameters
+    ----------
+     freq0 : array-like of shape = [n, 1]
+       It is the original matrix with freq0.
+     freq1 : array-like of shape = [n, 1]
+       It is the original matrix with freq1.
 
-    :Output:
-     `freqTable` : It returns the table with the frequncy (weights) for labels 0 and 1
+    Returns
+    -------
+    w0 : array-like of shape = [n, 1]
+        Label 0 frequency table.
 
-        >>>
-        >>> [Wpattern, w0, w1]
-        >>> [0,0,0,0, 0.25, 0.0]
-        >>> [0,0,0,1, 0.0, 0.125]
-        >>> [0,0,1,1, 0.125, 0.5]
+    w1 : array-like of shape = [n, 1]
+        Label 1 frequency table.
+
     """
-    freqTable = Matrix.astype('double')
-    freqTable[:,-1] = Matriz_t1[:,-1]/freq_sum(Matriz_t1)[1]
-    freqTable[:,-2] = Matriz_t1[:,-2]/freq_sum(Matriz_t1)[0]
-    return freqTable
+    w0 = freq0/freq_sum(freq0,freq1)
+    w1 = freq1/freq_sum(freq0,freq1)
+    return w0, w1
 
-def make_decision(Table):
+def make_decision(w0, w1):
     """ This is a utility function to make a decision for each pattern
     based on w0 (weight for label 0 ) and w1(weight for label 1).It takes as
-    input the table with w0 and w1 frequencies, compare those values and make a decision.
-    After it makes the decision it adds the label to the last table column respectively.
+    input the tables with w0 and w1 frequencies, compare those values and make a decision.
 
-    :Input:
-     `Table` : It takes the input table with w0 and w1 frequencies
+    Parameters
+    ----------
+    w0 : array-like of shape = [n, 1]
+        Label 0 frequency table.
 
-    :Output:
-     `Taux` : This is the table with w0 and w1 frequencies plus the decision label
-     at the last column.
+    w1 : array-like of shape = [n, 1]
+        Label 1 frequency table.
 
-     >>> i.e.
-     >>>[ 0.   0.   0.   0.   0.5  0.6  1. ]
-     >>>[ 0.   0.   0.   0.   0.2  0.3  1. ]
+    Returns
+    -------
+    Taux :  array-like of shape = [n, 1]
+        This is the table with the decision label
 
     """
-    i=0
-    ### Ainda estou na d[u]vida se adiciono a coluna de decisao na Tabela original
-    ### ou se mantenho uma tabela de 1 coluna com as decisoes
     Taux = np.array(())
-    ### Se for adicionar a decisao devo usar o Taux abaixo
-    #Taux = np.zeros((Table.shape[0],Table.shape[1]+1))
-    for row in Table:
-        if row[-2] > row[-1]:
+    for a,b in zip(w0,w1):
+        if a > b:
             Taux =  np.append(Taux,[0])
             #Taux[i] = np.hstack((row,0))
-        if row[-2] < row[-1]:
+        if a < b:
             Taux =  np.append(Taux,[1])
            #Taux[i] = np.hstack((row,1))
-        if row[-2] == row[-1]:
+        if a == b:
             Taux =  np.append(Taux,[0])
            #Taux[i] = np.hstack((row,0))
-        i = i + 1
     return Taux
 
+def normalize_Table(w0,w1):
+    """ This is just a utility function to normalize the table
+
+    Parameters
+    ----------
+    w0 : array-like of shape = [n, 1]
+        Label 0 frequency table.
+
+    w1 : array-like of shape = [n, 1]
+        Label 1 frequency table.
+
+    Returns
+    -------
+    w0 : array-like of shape = [n, 1]
+        Label 0 frequency table. Normalized though.
+
+    w1 : array-like of shape = [n, 1]
+        Label 1 frequency table. Normalized though.
+
+    """
+
+    #total = np.sum(Table[:,[-2,-1]])
+    #for row in Table:
+    #    row[-1] = row[-1]/total
+    #    row[-2] = row[-2]/total
+    return  w0/np.sum([w0,w1]), w1/np.sum([w0,w1])
+
+#TODO:
 def sel_car(Table):
     """ A function to feature selection procedure
     As it is not implemented yet it is returning a pre-set numpy array of indexes.
@@ -182,40 +190,42 @@ def sel_car(Table):
     return subset
 
 #TODO:
-def update_Table(Table,alpha_t):#betha
-    #w_i^{t+1} = w_i^t*betha_t^( 1- | h(xi) - yi | )
-    for row in Table:
-        if row[-1] < row[-2]:
-            row[-1] = row[-1]
-            row[-2] = row[-2]*betha
-        else:
-            row[-2] = row[-2]
-            row[-1] = row[-1]*betha
-
-    #D_{t+1}(xi) = D_t(xi)*exp(alpha_t ( 2* I (y_i != h_t(x_i)) -1 ))
-    for row in Table:
-        row[-1] = row[-1] * np.exp(alpha_t)
-        row[-1] = row[-1] * np.exp(-1)
-    return Table
-
-def normalize_Table(Table):
-    """ This is just a utility function to normalize the table
+def update_Table(Table,betha_t,w0,w1):#betha
+    """ This is just a utility function to update the table
+    of weights given the alpha_t value
 
     Parameters
     ----------
-    Table : array-like of shape = [n,m]
-            The input table that will be normalized
+    Table : array-like of shape = [n,m]. The input table to be updated.
+
+    betha_t: double value that will be used to update the weights in the
+    frequency table.
+
+    w0 : array-like of shape = [n, 1]
+        Label 0 frequency table.
+
+    w1 : array-like of shape = [n, 1]
+        Label 1 frequency table.
 
     Returns
     -------
-    Table : array-like of shape = [n,m]
-            The same table, normalized though.
-    """
+    Table : array-like of shape = [n,m].
+            The table with updated weights
 
-    total = np.sum(Table[:,[-2,-1]])
+    """
     for row in Table:
-        row[-1] = row[-1]/total
-        row[-2] = row[-2]/total
+    #w_i^{t+1} = w_i^t*betha_t^( 1- | h(xi) - yi | )
+        if row[-1] < row[-2]:
+            row[-1] = row[-1]
+            row[-2] = row[-2]*betha_t
+        else:
+            row[-2] = row[-2]
+            row[-1] = row[-1]*betha_t
+
+    #D_{t+1}(xi) = D_t(xi)*exp(alpha_t ( 2* I (y_i != h_t(x_i)) -1 ))
+    for row in Table:
+        row[-1] = row[-1] * np.exp(betha_t)
+        row[-1] = row[-1] * np.exp(-1)
     return Table
 
 if __name__ == "__main__":
@@ -226,8 +236,8 @@ if __name__ == "__main__":
     w0Sum = w0Sum.astype('double')
     w1Sum =  Matriz.freq1.sum()
     w1Sum = w1Sum.astype('double')
-    Matriz_t1 = append_to_matrix(Matriz.data,Matriz.data.shape[1],Matriz.freq0,Matriz.freq1)
-    Matriz_t1 = Matriz_t1.astype('double')
+   # Matriz_t1 = append_to_matrix(Matriz.data,Matriz.data.shape[1],Matriz.freq0,Matriz.freq1)
+   # Matriz_t1 = Matriz_t1.astype('double')
 
     Table = np.array(([0,0,0,0,0.5,0.6],
                       [0,0,0,0,0.2,0.3],
@@ -239,13 +249,17 @@ if __name__ == "__main__":
                       [0,0,1,0,0.4,0.3],
                       [0,1,1,0,0.7,0.6] ))
 
-freqTable = create_freq_Table(Matriz_t1)
+A = np.array(([0.3],[0.09],[0.3]))
+B = np.array(([0.1],[0.3],[0.15]))
+print make_decision(A,B)
+#freqTable = create_freq_Table(Matriz_t1)
 #print freqTable
-error_t = error(freqTable,0)
+#error_t = error(freqTable,0)
 #print alpha_factor(error_t)
-betha = betha_factor(error_t)
+#betha = betha_factor(error_t)
 #print betha_factor(error_t)
-print np.exp(-1)
+
+
 
     #for t in range(10):
     #    print ""
@@ -352,19 +366,59 @@ print np.exp(-1)
 #            unique[row] = 1
 #    return unique
 
+#@deprecated
+#def append_to_matrix(matrix1,matrix1_ncolumn, freq0, freq1):
+#    """ This function is meant to gather the window patterns and labels (0,1)
+#    frequencies into a single table.  Each row from freq0 matrix is appended to
+#    each respective row from matrix1 and each row from freq1 is appended to
+#    each respective row from matrix1.
+#
+#   Parameters
+#   ----------
+#   matrix1 : It is supposed to be a matrix read from xpl, i.e. matrix1 = matrix_read.data
+#   matrix1_ncolumn : It represents the number of columns from matrix1, i.e. matrix_read.data.shape[1]
+#   freq0 : freq0 is a matrix of labels 0 frequencies, i.e.  matrix_read.freq0
+#   freq1 : freq1 is a matrix of labels 1 frequencies, i.e.  matrix_read.freq1
+#
+#   Returns
+#   -------
+#   : numpy matrix with appended columns of freq0 and freq1
+#
+#    >>> Wpattern, freq0, freq1
+#    >>> '0,0,0,0, 200, 50'
+#
+#   """
+#    ###NOTE: data read from xplutil is uint8. Must convert to int64 or append wont work
+#    matrix1 = matrix1.astype('int64')
+#    freq0 = freq0.astype('int64')
+#    freq1 = freq1.astype('int64')
+#    aux_matrix = np.insert(matrix1,matrix1_ncolumn,values=freq0,axis=1)
+#    aux_matrix = np.insert(aux_matrix,matrix1_ncolumn+1,values=freq1, axis=1)
+#    return aux_matrix
+
 #TODO:
 def resample(Table, Subset):
-    """ function to resample """
+    """Predict classes for X.
+
+    The predicted class of an input sample is computed
+    as the weighted mean prediction of the classifiers in the ensemble.
+
+    Parameters
+    ----------
+    X : array-like of shape = [n_samples, n_features]
+        blabalbal.
+
+    Returns
+    -------
+    y : array of shape = [n_samples]
+
+
+    """
     return 0
 
-
-
 #def train_classifier():
-
 #def test_classifier():
-
 #def apply_classifier():    
-
 
 #M = np.array([[0,0,0,3,5],[0,0,1,2,5],[0,1,0,3,2],[0,1,1,2,4],[1,0,0,3,1],[1,1,0,5,1],[1,1,1,1,0]])
 #
@@ -377,6 +431,4 @@ def resample(Table, Subset):
 #       [1, 0, 0, 3, 1],
 #       [1, 1, 0, 5, 1],
 #       [1, 1, 1, 1, 0]])
-
-
 #M[:,(0,2)]
