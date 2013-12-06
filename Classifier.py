@@ -181,10 +181,16 @@ def normalize_Table(w0,w1):
     return  w0/np.sum([w0,w1]), w1/np.sum([w0,w1])
 
 #TODO:
-def sel_car(Table):
+def sel_car(Table, w0, w1):
     """ A function to feature selection procedure
     As it is not implemented yet it is returning a pre-set numpy array of indexes.
     subset = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
+
+    Parameters
+    ----------
+
+    Returns
+    -------
     """
     subset = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
     return subset
@@ -220,38 +226,137 @@ def update_Table(w0,w1,betha_t,decTable):#betha
     t = 0
     for i,j,k in zip(w0,w1,decTable):
         if k == 0:
-            w0[t] = i * 2
+            w0[t] = i * betha_t
             w1[t] = w1[t] * 1
         else:
-            w1[t] = j * 2
+            w1[t] = j * betha_t
             w0[t] = w0[t] * 1
         t = t +1
     return w0, w1
 
+def unique_rows(Table):
+    """ This is a utility function to return unique rows in a given table.
+
+    Parameters
+    ----------
+    Table : array-like of shape = [n,m].
+        The input table with repeated rows.
+
+    Returns
+    -------
+    unique : array-like of shape = [n,m].
+        The output table with unique rows.
+
+    """
+    uniq = np.unique(Table.view(Table.dtype.descr * Table.shape[1]))
+    unique = uniq.view(Table.dtype).reshape(-1, Table.shape[1])
+    return unique
+
+def create_dictionary(Table):
+    """ This function searches for repeated rows in a table,
+    remove repeated rows and then creates a dictionary with the rows and indexes.
+
+    Parameters
+    ----------
+    Table : array-like of shape = [n,m].
+        The output table with unique rows.
+
+    Returns
+    -------
+    dic : dictionary type.
+        It  returns a dictionary type with keys being the patterns and values being an array with the indexes
+        for all of the pattern occurrences.
+        For example : {(1, 0): (array([ 8, 16]),), (0, 0): (array([ 47, 48]),), (1, 1): (array([0]),)}
+
+    """
+    uniq =  unique_rows(Table)
+    dic = {}
+    for row in uniq:
+        dic[tuple(row)] = np.where(np.all(row==Table,axis=1))
+###########   index = np.where(np.all(row == a,axis=1))
+    return dic
+
 if __name__ == "__main__":
     #main()
-
     Matriz =  read_from_XPL(XPL_file_path)
-    w0Sum =  Matriz.freq0.sum()
-    w0Sum = w0Sum.astype('double')
-    w1Sum =  Matriz.freq1.sum()
-    w1Sum = w1Sum.astype('double')
-   # Matriz_t1 = append_to_matrix(Matriz.data,Matriz.data.shape[1],Matriz.freq0,Matriz.freq1)
-   # Matriz_t1 = Matriz_t1.astype('double')
+    freq0 = Matriz.freq0.astype('double')
+    freq1 = Matriz.freq1.astype('double')
+    [w0,w1] = create_freq_Table(freq0,freq1)
 
-    Table = np.array(([0,0,0,0,0.5,0.6],
-                      [0,0,0,0,0.2,0.3],
-                      [0,0,1,0,0.3,0.4],
-                      [0,0,1,0,0.4,0.5],
-                      [0,0,0,1,0.1,0.1],
-                      [0,0,0,1,0.5,0.6],
-                      [0,1,0,0,0.9,0.7],
-                      [0,0,1,0,0.4,0.3],
-                      [0,1,1,0,0.7,0.6] ))
+    #########sel_car#######
 
-A = np.array(([0.2],[0.3],[0.4]))
-B = np.array(([0.1],[0.2],[0.2]))
+    #for i in range(20):
+    #    decTable = make_decision(w0,w1)
+    #    epsilon_t = error(w0,w1)
+    #    betha_t = betha_factor(epsilon_t)
+    #    [w0,w1] = update_Table(w0, w1, betha_t, decTable)
+    #    [w0,w1] = normalize_Table(w0, w1)
 
+Table = np.array([[0, 0, 0, 0], [1, 1, 1, 0], [1, 0, 0, 1],[0, 0, 0, 0], [0, 0, 0, 1],
+                  [1, 0, 0, 0], [0, 0, 0, 0], [1, 0, 1, 1],[0, 1, 0, 0], [0, 1, 0, 0],
+                  [1, 0, 0, 0], [1, 1, 0, 0], [0, 0, 1, 1],[0, 1, 0, 0], [0, 1, 1, 0],
+                  [1, 1, 0, 0], [1, 1, 1, 1], [0, 0, 1, 1],[0, 1, 0, 1], [0, 1, 0, 1] ])
+
+a = np.array([[1, 1],[0, 0],[0, 0],[0, 0],[0, 0],[0, 1],[0, 1],[0, 1],[1, 0],[0, 1],
+              [0, 1],[0, 0],[0, 1],[0, 1],[0, 1],[0, 1],[1, 0],[0, 0],[0, 0],[1, 0],
+              [1, 0],[0, 0],[0, 0],[0, 1],[0, 1],[1, 0],[0, 0],[0, 0],[0, 1],[1, 0],
+              [0, 1],[0, 1],[0, 1],[0, 1],[0, 1],[0, 1],[0, 0],[0, 1],[0, 1],[1, 0],
+              [0, 1],[0, 0],[0, 1],[0, 1],[0, 1],[1, 0],[1, 0],[0, 0],[0, 0],[1, 0]])
+#print unique_rows(Table)
+#print np.array([np.array(x) for x in set(tuple(x) for x in a)]) # or "list(x) for x in set[...]"
+#b = np.ascontiguousarray(a).view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
+#_, idx = np.unique(b, return_index=True)
+#unique_a = a[idx]
+#print idx
+
+
+
+
+
+#print aux
+#print meHash
+#for linha in uniq:
+#    for row in a:
+#        if tuple(row) == tuple(linha):
+#            aux = myhash.get(tuple(row))
+#            aux.append(index(linha))
+#dict = {'Name': 'Zara', 'Age': 7, 'Class': 'First'};
+
+
+#arrayList.append(99)
+#dict['Age'] = arrayList
+#arrayList.append(98)
+#arrayList.append(97)
+#dict['Age'] = arrayList
+#arrayList = arrayList.append(2)
+#dict['Age'] = arrayList
+#dict['School'] = "DPS School"; # Add new entry
+
+
+
+#print "dict['Age']: ", dict['Age'];
+
+#subset = np.array([0,2,4,6,8,10,6,11,12,6,13,6,14,15,16,17,18,19,20])
+#itemindex = np.where(a == tuple([1,1]) )
+#print np.nonzero(a == tuple([1,1]))
+#print itemindex
+
+#x = np.array([0,0,0,8,5,0,1,0,1,0,1,3,4,5,3,4,5,3,4,5,6,7,8,7,6,8])
+#print np.bincount(x)
+#xx =  np.unique(x,True)
+#print xx
+#print subset
+#print
+
+#w0 = np.array([0.2, 0.1, 0.1, 0.2, 0.1, 0.2, 0.2, 0.1, 0.1])
+#print w0
+#groups = np.array([0,0,0,0,1,1,1,0,2])
+#print groups
+#unique_groups = np.unique(groups,True)
+#print unique_groups
+
+#sums = np.histogram(groups,bins=np.arange(groups.min(), groups.max()+2),weights=w0)[0]
+#print sums
 #freqTable = create_freq_Table(Matriz_t1)
 #print freqTable
 #error_t = error(freqTable,0)
@@ -311,14 +416,6 @@ B = np.array(([0.1],[0.2],[0.2]))
 
 
 ####You use the built-in int() function, and pass it the base of the input number, i.e. 2 for a binary number.
-#Matriz =  read_from_XPL(XPL_file_path)
-#w0Sum =  Matriz.freq0.sum()
-#w0Sum = w0Sum.astype('double')
-#w1Sum =  Matriz.freq1.sum()
-#w1Sum = w1Sum.astype('double')
-#Matriz_t1 = append_to_matrix(Matriz.data,Matriz.data.shape[1],Matriz.freq0,Matriz.freq1)
-#Matriz_t1 = Matriz_t1.astype('double')
-
 #print Matriz_t1[0]
 #MM = Matriz_t1.astype('double')
 #Matriz_t1[:,-1]/freq_sum(Matriz_t1)[0]
@@ -328,7 +425,6 @@ B = np.array(([0.1],[0.2],[0.2]))
 #Matriz_t1 = Matriz_t1.astype('double')
 #print Matriz_t1[:,-2]
 #print MM[8]
-
 
 #for testing purposes
 #Table = np.array(([0,0,0.1,0.2],
@@ -347,13 +443,6 @@ B = np.array(([0.1],[0.2],[0.2]))
 #print Matriz_t1
 #print dec_from_matrixRow(Matriz.data[2])
 #build_dict()
-
-#TODO:
-#def norm():
-#    """ This is a function to calculate the normalizing value """
-    #norm =
-    #return norm
-    #np.exp()
 
 #def unique_rows(data):
 #    unique = dict()
@@ -397,29 +486,29 @@ B = np.array(([0.1],[0.2],[0.2]))
 #    return aux_matrix
 
 #TODO:
-def resample(Table, Subset):
-    """Predict classes for X.
-
-    The predicted class of an input sample is computed
-    as the weighted mean prediction of the classifiers in the ensemble.
-
-    Parameters
-    ----------
-    X : array-like of shape = [n_samples, n_features]
-        blabalbal.
-
-    Returns
-    -------
-    y : array of shape = [n_samples]
-
-
-    """
-    return 0
+#def resample(Table, Subset):
+#    """Predict classes for X.
+#
+#    The predicted class of an input sample is computed
+#    as the weighted mean prediction of the classifiers in the ensemble.
+#
+#    Parameters
+#    ----------
+#    X : array-like of shape = [n_samples, n_features]
+#        blabalbal.
+#
+#    Returns
+#    -------
+#    y : array of shape = [n_samples]
+#
+#    """
+#    return 0
 
 #def train_classifier():
 #def test_classifier():
 #def apply_classifier():    
-
+#def fit(self, X, y):
+#def predict(self,X):
 #M = np.array([[0,0,0,3,5],[0,0,1,2,5],[0,1,0,3,2],[0,1,1,2,4],[1,0,0,3,1],[1,1,0,5,1],[1,1,1,1,0]])
 #
 #M
