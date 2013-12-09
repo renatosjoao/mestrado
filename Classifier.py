@@ -73,12 +73,10 @@ def error(w0, w1):
     """
     epsilon_t = 0.0
     for a,b in zip(w0,w1):
-        if a < b:
+        if a <= b:
             epsilon_t = epsilon_t + a
-        elif b < a:
-            epsilon_t = epsilon_t + b
         else:
-            epsilon_t = epsilon_t + a
+            epsilon_t = epsilon_t + b
     return epsilon_t
 
 def betha_factor(epsilon_t):
@@ -117,8 +115,9 @@ def create_freq_Table(freq0, freq1):
         Label 1 frequency table.
 
     """
-    w0 = freq0/freq_sum(freq0,freq1)
-    w1 = freq1/freq_sum(freq0,freq1)
+    fsum = freq_sum(freq0,freq1)
+    w0 = freq0/fsum
+    w1 = freq1/fsum
     return w0, w1
 
 def make_decision(w0, w1):
@@ -142,16 +141,12 @@ def make_decision(w0, w1):
     """
     Taux = np.array(())
     for a,b in zip(w0,w1):
-        if a > b:
+        if a >= b:
             Taux =  np.append(Taux,[0])
-            #Taux[i] = np.hstack((row,0))
         if a < b:
             Taux =  np.append(Taux,[1])
-           #Taux[i] = np.hstack((row,1))
-        if a == b:
-            Taux =  np.append(Taux,[0])
-           #Taux[i] = np.hstack((row,0))
     return Taux
+
 
 def normalize_Table(w0,w1):
     """ This is just a utility function to normalize the table
@@ -227,10 +222,8 @@ def update_Table(w0,w1,betha_t,decTable):#betha
     for i,j,k in zip(w0,w1,decTable):
         if k == 0:
             w0[t] = i * betha_t
-            w1[t] = w1[t] * 1
         else:
             w1[t] = j * betha_t
-            w0[t] = w0[t] * 1
         t = t +1
     return w0, w1
 
@@ -248,8 +241,9 @@ def unique_rows(Table):
         The output table with unique rows.
 
     """
-    uniq = np.unique(Table.view(Table.dtype.descr * Table.shape[1]))
-    unique = uniq.view(Table.dtype).reshape(-1, Table.shape[1])
+    b = Table.ravel().view(np.dtype((np.void, Table.dtype.itemsize*Table.shape[1])))
+    _, unique_idx = np.unique(b, return_index=True)
+    unique = Table[np.sort(unique_idx)]
     return unique
 
 def create_dictionary(Table):
@@ -276,6 +270,44 @@ def create_dictionary(Table):
 ###########   index = np.where(np.all(row == a,axis=1))
     return dic
 
+def create_projected_tab(Table, subset_index_Array):
+    """ This function is meant to create a projected table given the subset index array.
+
+    Parameters
+    ----------
+    Table : array-like of shape = [n,m].
+        The input table with patterns rows.
+
+    subset_index_Array : array-like of shape = [1,m].
+        The indexes selected from the feature selection process.
+
+    Returns
+    -------
+    newTable : array-like of shape = [n,m].
+        The output projected table with only the selected columns.
+
+    """
+    newTable = Table[:,subset_index_Array]
+    return newTable
+
+def group_weights(dic,uniq, w0, w1):
+    """ This function is meant to group weights from w0 and w1 based on the
+    indexes passed by the dictionary.
+
+    """
+    t=0
+    waux0 = np.zeros((uniq.shape[0]))
+    waux1 = np.zeros((uniq.shape[0]))
+    for row in uniq:
+        arr = dic.get(tuple(row.reshape(1,-1)[0]))
+        indexes =  tuple(arr[0].reshape(1,-1)[0])
+        waux0[t] = np.sum(w0[[indexes]])
+        waux1[t] = np.sum(w1[[indexes]])
+        t+=1
+    w0 = waux0
+    w1 = waux1
+    return w0,w1
+
 if __name__ == "__main__":
     #main()
     Matriz =  read_from_XPL(XPL_file_path)
@@ -292,17 +324,27 @@ if __name__ == "__main__":
     #    [w0,w1] = update_Table(w0, w1, betha_t, decTable)
     #    [w0,w1] = normalize_Table(w0, w1)
 
-Table = np.array([[0, 0, 0, 0], [1, 1, 1, 0], [1, 0, 0, 1],[0, 0, 0, 0], [0, 0, 0, 1],
-                  [1, 0, 0, 0], [0, 0, 0, 0], [1, 0, 1, 1],[0, 1, 0, 0], [0, 1, 0, 0],
-                  [1, 0, 0, 0], [1, 1, 0, 0], [0, 0, 1, 1],[0, 1, 0, 0], [0, 1, 1, 0],
-                  [1, 1, 0, 0], [1, 1, 1, 1], [0, 0, 1, 1],[0, 1, 0, 1], [0, 1, 0, 1] ])
+Table = np.array([[1, 2, 3, 4], [1, 1, 1, 0], [1, 0, 0, 1],[0, 0, 0, 0], [0, 0, 0, 1],
+                  [1, 0, 0, 0], [0, 0, 0, 0], [1, 0, 1, 1],[0, 1, 0, 0], [0, 1, 0, 0] ])
 
-a = np.array([[1, 1],[0, 0],[0, 0],[0, 0],[0, 0],[0, 1],[0, 1],[0, 1],[1, 0],[0, 1],
+aa = np.array([[1, 1],[0, 0],[0, 0],[0, 0],[0, 0],[0, 1],[0, 1],[0, 1],[1, 0],[0, 1],
               [0, 1],[0, 0],[0, 1],[0, 1],[0, 1],[0, 1],[1, 0],[0, 0],[0, 0],[1, 0],
               [1, 0],[0, 0],[0, 0],[0, 1],[0, 1],[1, 0],[0, 0],[0, 0],[0, 1],[1, 0],
               [0, 1],[0, 1],[0, 1],[0, 1],[0, 1],[0, 1],[0, 0],[0, 1],[0, 1],[1, 0],
               [0, 1],[0, 0],[0, 1],[0, 1],[0, 1],[1, 0],[1, 0],[0, 0],[0, 0],[1, 0]])
-#print unique_rows(Table)
+
+w0 = np.array([[0.1],[0.2],[0.3],[0.4],[0.5],[0.6],[0.7],[0.8],[0.9],[1.0]])
+w1 = np.array([[1],[2],[3],[4],[5],[6],[7],[8],[9],[10]])
+
+
+#print np.sum(w0[[0,2]])
+a = create_projected_tab(Table,np.array([0,1]))
+print "*************"
+uniq = unique_rows(a)
+dic = create_dictionary(a)
+
+#arr =  np.array([ [1], [4], [3], [2] ])
+
 #print np.array([np.array(x) for x in set(tuple(x) for x in a)]) # or "list(x) for x in set[...]"
 #b = np.ascontiguousarray(a).view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
 #_, idx = np.unique(b, return_index=True)
