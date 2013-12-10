@@ -188,7 +188,7 @@ def sel_car(Table, w0, w1):
 
 def update_Table(w0,w1,betha_t,decTable):#betha
     """ This is just a utility function to update the table
-    of weights given the alpha_t value
+    of weights given the betha_t value
 
     Parameters
     ----------
@@ -328,20 +328,54 @@ def group_weights(dic,uniq, w0, w1):
     w1 = waux1
     return w0,w1
 
+def unproject(dictionary, uniqueRows, decTable):
+    """  This function is meant to assign predictions from decTable to the table
+    before resampling
+
+    Parameters
+    ---------
+    dictionary : dictionary type.
+        A dictionary type with keys being the patterns and values being an array with the indexes
+        for all of the pattern occurrences.
+        For example : {(1, 0): (array([ 8, 16]),), (0, 0): (array([ 47, 48]),), (1, 1): (array([0]),)}
+
+    uniqueRows : array-like of shape = [n,m].
+        The table with unique patterns.
+
+    Returns
+    -------
+    decisionTable : array-like of shape = [n, 1]
+        This  is supposed to be the decision table for the initial table.
+    """
+    decisionTable  = np.zeros((uniqueRows.shape[0],1))
+    i= 0
+    for row in uniqueRows:
+        arr = dictionary.get(tuple(row.reshape(1,-1)[0]))
+        indexes =  tuple(arr[0].reshape(1,-1)[0])
+        decisionTable[indexes,:] = decTable[i]
+        i+=1
+    return decisionTable
+
 if __name__ == "__main__":
     #main()
+#************* PASSOS de EXECUCAO do ALGORITMO ************
     Matriz =  read_from_XPL(XPL_file_path)
     freq0 = Matriz.freq0.astype('double')
     freq1 = Matriz.freq1.astype('double')
     [w0,w1] = create_freq_Table(freq0,freq1)
-
-    #########sel_car#######
+    #########sel_car() #######
 
     #for i in range(20):
-    #    decTable = make_decision(w0,w1)
-    #    epsilon_t = error(w0,w1)
+    #
+    #    projTable = create_projected_tab(Table, indexes)
+    #    dict = create_dictionary(projTable)
+    #    table_unique_rows = unique_rows(Table)
+    #    [w0_grp,w1_grp] = group_weights(dict, table_unique_rows,w0,w1)
+    #    decTable = make_decision(w0_grp,w1_grp)
+    #    epsilon_t = error(w0_grp,w1_grp)
     #    betha_t = betha_factor(epsilon_t)
-    #    [w0,w1] = update_Table(w0, w1, betha_t, decTable)
+    #    psiTable = unproject(dict,table_unique_rows,decTable)
+    #    [w0,w1] = update_Table(w0, w1, betha_t, psiTable)
     #    [w0,w1] = normalize_Table(w0, w1)
 
 Table = np.array([[1, 2, 3, 4], [1, 1, 1, 0], [1, 0, 0, 1],[0, 0, 0, 0], [0, 0, 0, 1],
@@ -354,54 +388,21 @@ aa = np.array([[1, 1],[0, 0],[0, 0],[0, 0],[0, 0],[0, 1],[0, 1],[0, 1],[1, 0],[0
               [0, 1],[0, 0],[0, 1],[0, 1],[0, 1],[1, 0],[1, 0],[0, 0],[0, 0],[1, 0]])
 
 w0 = np.array([[2],[0.2],[3],[0.3],[4],[0.4],[5],[0.5],[6],[0.6]])
-w1 = np.array([[1],[2],[3],[4],[5],[6],[7],[8],[9],[10]])
+w1 = np.array([[1],[2],[0.5],[4],[0.5],[6],[0.5],[8],[0.5],[10]])
 
 
-#print np.sum(w0[[0,2]])
-#a = create_projected_tab(Table,np.array([0,1]))
-#print "*************"
-#uniq = unique_rows(a)
-#dic = create_dictionary(a)
-#[w0,w1] = group_weights(dic,uniq,w0,w1)
-#arr =  np.array([ [1], [4], [3], [2] ])
-print uniq
-print dic
-print w0
-print w1
-
-
-#print np.array([np.array(x) for x in set(tuple(x) for x in a)]) # or "list(x) for x in set[...]"
-#b = np.ascontiguousarray(a).view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
-#_, idx = np.unique(b, return_index=True)
-#unique_a = a[idx]
-#print idx
+#print Table
+a = create_projected_tab(Table,np.array([0,1]))
+uniq = unique_rows(a)
+dic = create_dictionary(a)
+[w0_grp,w1_grp] = group_weights(dic,uniq,w0,w1)
+decTable = make_decision(w0_grp,w1_grp)
+indix =  dic.get(tuple(uniq[0].reshape(1,-1)[0]))
 
 
 
 
 
-#print aux
-#print meHash
-#for linha in uniq:
-#    for row in a:
-#        if tuple(row) == tuple(linha):
-#            aux = myhash.get(tuple(row))
-#            aux.append(index(linha))
-#dict = {'Name': 'Zara', 'Age': 7, 'Class': 'First'};
-
-
-#arrayList.append(99)
-#dict['Age'] = arrayList
-#arrayList.append(98)
-#arrayList.append(97)
-#dict['Age'] = arrayList
-#arrayList = arrayList.append(2)
-#dict['Age'] = arrayList
-#dict['School'] = "DPS School"; # Add new entry
-
-
-
-#print "dict['Age']: ", dict['Age'];
 
 #subset = np.array([0,2,4,6,8,10,6,11,12,6,13,6,14,15,16,17,18,19,20])
 #itemindex = np.where(a == tuple([1,1]) )
