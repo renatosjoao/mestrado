@@ -173,7 +173,8 @@ def normalize_Table(w0,w1):
     #for row in Table:
     #    row[-1] = row[-1]/total
     #    row[-2] = row[-2]/total
-    return  w0/np.sum([w0,w1]), w1/np.sum([w0,w1])
+    total = np.sum([w0,w1])
+    return  w0/total, w1/total
 
 #TODO:
 def sel_car(Table, w0, w1):
@@ -294,6 +295,30 @@ def group_weights(dic,uniq, w0, w1):
     """ This function is meant to group weights from w0 and w1 based on the
     indexes passed by the dictionary.
 
+    Parameters
+    ---------
+    dic : dictionary type.
+        A dictionary type with keys being the patterns and values being an array with the indexes
+        for all of the pattern occurrences.
+        For example : {(1, 0): (array([ 8, 16]),), (0, 0): (array([ 47, 48]),), (1, 1): (array([0]),)}
+
+    uniq : array-like of shape = [n,m].
+        The table with unique patterns.
+
+    w0 : array-like of shape = [n, 1]
+        Label 0 frequency table.
+
+    w1 : array-like of shape = [n, 1]
+        Label 1 frequency table.
+
+    Returns
+    -------
+    w0 : array-like of shape = [n, 1]
+        Label 0 frequency table.
+
+    w1 : array-like of shape = [n, 1]
+        Label 1 frequency table. Normalized though.
+
     """
     t=0
     waux0 = np.zeros((uniq.shape[0]))
@@ -342,8 +367,13 @@ a = create_projected_tab(Table,np.array([0,1]))
 print "*************"
 uniq = unique_rows(a)
 dic = create_dictionary(a)
-
+[w0,w1] = group_weights(dic,uniq,w0,w1)
 #arr =  np.array([ [1], [4], [3], [2] ])
+print uniq
+print dic
+print w0
+print w1
+
 
 #print np.array([np.array(x) for x in set(tuple(x) for x in a)]) # or "list(x) for x in set[...]"
 #b = np.ascontiguousarray(a).view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
