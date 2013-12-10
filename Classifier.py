@@ -139,12 +139,7 @@ def make_decision(w0, w1):
         This is the table with the decision label
 
     """
-    Taux = np.array(())
-    for a,b in zip(w0,w1):
-        if a >= b:
-            Taux =  np.append(Taux,[0])
-        if a < b:
-            Taux =  np.append(Taux,[1])
+    Taux = np.argmax((w0,w1),axis=0)
     return Taux
 
 
@@ -358,16 +353,16 @@ aa = np.array([[1, 1],[0, 0],[0, 0],[0, 0],[0, 0],[0, 1],[0, 1],[0, 1],[1, 0],[0
               [0, 1],[0, 1],[0, 1],[0, 1],[0, 1],[0, 1],[0, 0],[0, 1],[0, 1],[1, 0],
               [0, 1],[0, 0],[0, 1],[0, 1],[0, 1],[1, 0],[1, 0],[0, 0],[0, 0],[1, 0]])
 
-w0 = np.array([[0.1],[0.2],[0.3],[0.4],[0.5],[0.6],[0.7],[0.8],[0.9],[1.0]])
+w0 = np.array([[2],[0.2],[3],[0.3],[4],[0.4],[5],[0.5],[6],[0.6]])
 w1 = np.array([[1],[2],[3],[4],[5],[6],[7],[8],[9],[10]])
 
 
 #print np.sum(w0[[0,2]])
-a = create_projected_tab(Table,np.array([0,1]))
-print "*************"
-uniq = unique_rows(a)
-dic = create_dictionary(a)
-[w0,w1] = group_weights(dic,uniq,w0,w1)
+#a = create_projected_tab(Table,np.array([0,1]))
+#print "*************"
+#uniq = unique_rows(a)
+#dic = create_dictionary(a)
+#[w0,w1] = group_weights(dic,uniq,w0,w1)
 #arr =  np.array([ [1], [4], [3], [2] ])
 print uniq
 print dic
