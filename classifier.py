@@ -71,12 +71,7 @@ def error(w0, w1):
         The error value for the current iteraction.
 
     """
-    epsilon_t = 0.0
-    for a,b in zip(w0,w1):
-        if a <= b:
-            epsilon_t = epsilon_t + a
-        else:
-            epsilon_t = epsilon_t + b
+    epsilon_t = np.sum(np.min((w0, w1), axis=0))
     return epsilon_t
 
 def betha_factor(epsilon_t):
