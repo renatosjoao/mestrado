@@ -10,20 +10,20 @@ __copyright__ = "Copyright (c) 2013 Renato SJ"
 __license__ = "Python"
 
 
-import numpy as np 
+import numpy as np
 import xplutil as xplutil
 
 
-XPL_file_path = '/home/rsjoao/Dropbox/projetoMestrado/codigo/DRIVE/training set/drive7'
-CSV_file_path= ''
+XPL_FILE_PATH = '/home/rsjoao/Dropbox/projetoMestrado/codigo/DRIVE/training set/drive7'
+CSV_FILE_PATH = ''
 
 
-def read_from_XPL(XPL_file_path):
+def read_from_XPL(xpl_file_path):
     """xplutil.py already reads from XPL file.
 
     Parameters
     ----------
-    XPL_file_path : '/home/jdoe/path_to_xpl'
+    xpl_file_path : '/home/jdoe/path_to_xpl'
                     The path to the XPL file.
 
     Returns
@@ -32,7 +32,7 @@ def read_from_XPL(XPL_file_path):
             Same as xplutil returns.
 
     """
-    result = xplutil.read_xpl(XPL_file_path)
+    result = xplutil.read_xpl(xpl_file_path)
     return result
 
 def freq_sum(w0, w1):
@@ -52,7 +52,7 @@ def freq_sum(w0, w1):
         Returns the sum for all w0,w1 values.
 
     """
-    return np.sum([w0,w1])
+    return np.sum([w0, w1])
 
 def error(w0, w1):
     """ This is a function to calculate the error for the current interaction
@@ -91,7 +91,7 @@ def beta_factor(epsilon_t):
     beta_t = epsilon_t / (1.0 - epsilon_t)
     return beta_t
 
-def create_freq_Table(freq0, freq1):
+def create_freq_table(freq0, freq1):
     """ This is a function to create a frequency table.
 
     Parameters
@@ -110,7 +110,7 @@ def create_freq_Table(freq0, freq1):
         Label 1 frequency table.
 
     """
-    fsum = freq_sum(freq0,freq1)
+    fsum = freq_sum(freq0, freq1)
     w0 = freq0/fsum
     w1 = freq1/fsum
     return w0, w1
@@ -130,15 +130,15 @@ def make_decision(w0, w1):
 
     Returns
     -------
-    Taux :  array-like of shape = [n, 1]
+    decision_table :  array-like of shape = [n, 1]
         This is the table with the decision label
 
     """
-    Taux = np.argmax((w0,w1),axis=0)
-    return Taux
+    decision_table = np.argmax((w0, w1), axis=0)
+    return decision_table
 
 
-def normalize_Table(w0,w1):
+def normalize_table(w0, w1):
     """ This is just a utility function to normalize the table
 
     Parameters
@@ -163,25 +163,10 @@ def normalize_Table(w0,w1):
     #for row in Table:
     #    row[-1] = row[-1]/total
     #    row[-2] = row[-2]/total
-    total = np.sum([w0,w1])
+    total = np.sum([w0, w1])
     return  w0/total, w1/total
 
-#TODO:
-def sel_car(Table, w0, w1):
-    """ A function to feature selection procedure
-    As it is not implemented yet it is returning a pre-set numpy array of indexes.
-    subset = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    """
-    subset = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
-    return subset
-
-def update_table(w0, w1, beta_t, decTable): #beta
+def update_table(w0, w1, beta_t, dec_table): #beta
     """ This is just a utility function to update the table
     of weights given the beta_t value
 
@@ -197,7 +182,7 @@ def update_table(w0, w1, beta_t, decTable): #beta
         That value will be used to update the weights in the
         frequency table.
 
-    decTable : array-like of shape = [n,1].
+    dec_table : array-like of shape = [n,1].
         The input decision table.
 
     Returns
@@ -210,7 +195,7 @@ def update_table(w0, w1, beta_t, decTable): #beta
 
     """
     # TODO: the returned table is not normalized; should it be that way?
-    update_w0 = (decTable == 0)
+    update_w0 = (dec_table == 0)
     w0[update_w0] *= beta_t
     w1[~update_w0] *= beta_t
     return w0, w1
@@ -259,7 +244,8 @@ def create_dictionary(Table):
     return dic
 
 def create_projected_tab(Table, subset_index_Array):
-    """ This function is meant to create a projected table given the subset index array.
+    """ This function is meant to create a projected table given the subset
+    index array.
 
     Parameters
     ----------
@@ -320,8 +306,8 @@ def group_weights(dic,uniq, w0, w1):
     w1 = waux1
     return w0,w1
 
-def unproject(dictionary, uniqueRows, decTable):
-    """  This function is meant to assign predictions from decTable to the table
+def unproject(dictionary, uniqueRows, dec_table):
+    """  This function is meant to assign predictions from dec_table to the table
     before resampling
 
     Parameters
@@ -344,17 +330,17 @@ def unproject(dictionary, uniqueRows, decTable):
     for row in uniqueRows:
         arr = dictionary.get(tuple(row.reshape(1,-1)[0]))
         indexes =  tuple(arr[0].reshape(1,-1)[0])
-        decisionTable[indexes,:] = decTable[i]
+        decisionTable[indexes,:] = dec_table[i]
         i+=1
     return decisionTable
 
 if __name__ == "__main__":
     #main()
 #************* PASSOS de EXECUCAO do ALGORITMO ************
-    Matriz =  read_from_XPL(XPL_file_path)
+    Matriz =  read_from_XPL(XPL_FILE_PATH)
     freq0 = Matriz.freq0.astype('double')
     freq1 = Matriz.freq1.astype('double')
-    [w0,w1] = create_freq_Table(freq0,freq1)
+    [w0,w1] = create_freq_table(freq0,freq1)
     #########sel_car() #######
 
     #for i in range(20):
@@ -363,18 +349,19 @@ if __name__ == "__main__":
     #    dict = create_dictionary(projTable)
     #    table_unique_rows = unique_rows(Table)
     #    [w0_grp,w1_grp] = group_weights(dict, table_unique_rows,w0,w1)
-    #    decTable = make_decision(w0_grp,w1_grp)
+    #    dec_table = make_decision(w0_grp,w1_grp)
     #    epsilon_t = error(w0_grp,w1_grp)
     #    beta_t = beta_factor(epsilon_t)
-    #    psiTable = unproject(dict,table_unique_rows,decTable)
+    #    psiTable = unproject(dict,table_unique_rows,dec_table)
     #    [w0,w1] = update_Table(w0, w1, beta_t, psiTable)
-    #    [w0,w1] = normalize_Table(w0, w1)
+    #    [w0,w1] = normalize_table(w0, w1)
 
-Table = np.array([[1, 2, 3, 4], [1, 1, 1, 0], [1, 0, 0, 1],[0, 0, 0, 0], [0, 0, 0, 1],
-                  [1, 0, 0, 0], [0, 0, 0, 0], [1, 0, 1, 1],[0, 1, 0, 0], [0, 1, 0, 0] ])
+Table = np.array([[1, 2, 3, 4], [1, 1, 1, 0], [1, 0, 0, 1],[0, 0, 0, 0], 
+                  [0, 0, 0, 1], [1, 0, 0, 0], [0, 0, 0, 0], [1, 0, 1, 1],
+                  [0, 1, 0, 0], [0, 1, 0, 0] ])
 
-aa = np.array([[1, 1],[0, 0],[0, 0],[0, 0],[0, 0],[0, 1],[0, 1],[0, 1],[1, 0],[0, 1],
-              [0, 1],[0, 0],[0, 1],[0, 1],[0, 1],[0, 1],[1, 0],[0, 0],[0, 0],[1, 0],
+aa = np.array([[1, 1],[0, 0],[0, 0],[0, 0],[0, 0],[0, 1],[0, 1],[0, 1],[1, 0],
+               [0, 1],[0, 1],[0, 0],[0, 1],[0, 1],[0, 1],[0, 1],[1, 0],[0, 0],[0, 0],[1, 0],
               [1, 0],[0, 0],[0, 0],[0, 1],[0, 1],[1, 0],[0, 0],[0, 0],[0, 1],[1, 0],
               [0, 1],[0, 1],[0, 1],[0, 1],[0, 1],[0, 1],[0, 0],[0, 1],[0, 1],[1, 0],
               [0, 1],[0, 0],[0, 1],[0, 1],[0, 1],[1, 0],[1, 0],[0, 0],[0, 0],[1, 0]])
@@ -388,7 +375,7 @@ a = create_projected_tab(Table,np.array([0,1]))
 uniq = unique_rows(a)
 dic = create_dictionary(a)
 [w0_grp,w1_grp] = group_weights(dic,uniq,w0,w1)
-decTable = make_decision(w0_grp,w1_grp)
+dec_table = make_decision(w0_grp,w1_grp)
 indix =  dic.get(tuple(uniq[0].reshape(1,-1)[0]))
 
 
@@ -417,7 +404,7 @@ indix =  dic.get(tuple(uniq[0].reshape(1,-1)[0]))
 
 #sums = np.histogram(groups,bins=np.arange(groups.min(), groups.max()+2),weights=w0)[0]
 #print sums
-#freqTable = create_freq_Table(Matriz_t1)
+#freqTable = create_freq_table(Matriz_t1)
 #print freqTable
 #error_t = error(freqTable,0)
 #print alpha_factor(error_t)
@@ -566,7 +553,7 @@ indix =  dic.get(tuple(uniq[0].reshape(1,-1)[0]))
 
 #def train_classifier():
 #def test_classifier():
-#def apply_classifier():    
+#def apply_classifier():
 #def fit(self, X, y):
 #def predict(self,X):
 #M = np.array([[0,0,0,3,5],[0,0,1,2,5],[0,1,0,3,2],[0,1,1,2,4],[1,0,0,3,1],[1,1,0,5,1],[1,1,1,1,0]])
