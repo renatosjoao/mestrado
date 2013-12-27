@@ -74,8 +74,8 @@ def error(w0, w1):
     epsilon_t = np.sum(np.min((w0, w1), axis=0))
     return epsilon_t
 
-def betha_factor(epsilon_t):
-    """ This is a function to calculate the betha_t factor
+def beta_factor(epsilon_t):
+    """ This is a function to calculate the beta_t factor
 
     Parameters
     ----------
@@ -84,12 +84,12 @@ def betha_factor(epsilon_t):
 
     Returns
     -------
-     betha_t : double
-         Betha value for the current iteraction
+     beta_t : double
+         Beta value for the current iteraction
 
      """
-    betha_t = epsilon_t / (1.0 - epsilon_t)
-    return betha_t
+    beta_t = epsilon_t / (1.0 - epsilon_t)
+    return beta_t
 
 def create_freq_Table(freq0, freq1):
     """ This is a function to create a frequency table.
@@ -181,9 +181,9 @@ def sel_car(Table, w0, w1):
     subset = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
     return subset
 
-def update_table(w0, w1, betha_t, decTable): #betha
+def update_table(w0, w1, beta_t, decTable): #beta
     """ This is just a utility function to update the table
-    of weights given the betha_t value
+    of weights given the beta_t value
 
     Parameters
     ----------
@@ -193,7 +193,7 @@ def update_table(w0, w1, betha_t, decTable): #betha
     w1 : array-like of shape = [n, 1]
         Label 1 frequency table.
 
-    betha_t: double value.
+    beta_t: double value.
         That value will be used to update the weights in the
         frequency table.
 
@@ -209,14 +209,10 @@ def update_table(w0, w1, betha_t, decTable): #betha
         Label 1 frequency table updated.
 
     """
-    # TODO: the returned table is not normalized; should it that way?
-    t = 0
-    for i, j, k in zip(w0, w1, decTable):
-        if k == 0:
-            w0[t] = i*betha_t
-        else:
-            w1[t] = j*betha_t
-        t = t + 1
+    # TODO: the returned table is not normalized; should it be that way?
+    update_w0 = (decTable == 0)
+    w0[update_w0] *= beta_t
+    w1[~update_w0] *= beta_t
     return w0, w1
 
 def unique_rows(Table):
@@ -369,9 +365,9 @@ if __name__ == "__main__":
     #    [w0_grp,w1_grp] = group_weights(dict, table_unique_rows,w0,w1)
     #    decTable = make_decision(w0_grp,w1_grp)
     #    epsilon_t = error(w0_grp,w1_grp)
-    #    betha_t = betha_factor(epsilon_t)
+    #    beta_t = beta_factor(epsilon_t)
     #    psiTable = unproject(dict,table_unique_rows,decTable)
-    #    [w0,w1] = update_Table(w0, w1, betha_t, psiTable)
+    #    [w0,w1] = update_Table(w0, w1, beta_t, psiTable)
     #    [w0,w1] = normalize_Table(w0, w1)
 
 Table = np.array([[1, 2, 3, 4], [1, 1, 1, 0], [1, 0, 0, 1],[0, 0, 0, 0], [0, 0, 0, 1],
@@ -425,8 +421,8 @@ indix =  dic.get(tuple(uniq[0].reshape(1,-1)[0]))
 #print freqTable
 #error_t = error(freqTable,0)
 #print alpha_factor(error_t)
-#betha = betha_factor(error_t)
-#print betha_factor(error_t)
+#beta = beta_factor(error_t)
+#print beta_factor(error_t)
 
 
 
