@@ -181,7 +181,7 @@ def sel_car(Table, w0, w1):
     subset = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
     return subset
 
-def update_Table(w0,w1,betha_t,decTable):#betha
+def update_table(w0,w1,betha_t,decTable):#betha
     """ This is just a utility function to update the table
     of weights given the betha_t value
 
