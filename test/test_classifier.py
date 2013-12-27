@@ -25,7 +25,6 @@ def test_error():
     nt.assert_almost_equal(e0, expected_error)
     
 def test_update_table():
-    pass
     w0 =  np.array([.2,  0.25, 0.02, 0.04])
     w1 =  np.array([.25, 0.2,  0.02, 0.02])
     dec = np.array([ 1,  0,    0,    1], dtype=np.int)
