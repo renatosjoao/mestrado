@@ -68,7 +68,7 @@ def error(w0, w1):
     Returns
     -------
     epsilon_t : double
-        The error value for the current iteraction.
+        The error value for the current iteration.
 
     """
     epsilon_t = np.sum(np.min((w0, w1), axis=0))
@@ -85,7 +85,7 @@ def beta_factor(epsilon_t):
     Returns
     -------
      beta_t : double
-         Beta value for the current iteraction
+         Beta value for the current iteration
 
      """
     beta_t = epsilon_t / (1.0 - epsilon_t)
@@ -163,7 +163,7 @@ def normalize_table(w0, w1):
     #for row in Table:
     #    row[-1] = row[-1]/total
     #    row[-2] = row[-2]/total
-    total = np.sum([w0, w1])
+    total = float(np.sum([w0, w1]))
     return  w0/total, w1/total
 
 def update_table(w0, w1, beta_t, dec_table): #beta
@@ -199,6 +199,36 @@ def update_table(w0, w1, beta_t, dec_table): #beta
     w0[update_w0] *= beta_t
     w1[~update_w0] *= beta_t
     return w0, w1
+
+def _apply_transform(hashed_table, w0, w1):
+    """
+    
+    Parameters:
+    ---------------
+    hashed_table: array-like of shape = [r, 1].
+        Each row a hashed version of an input pattern, so we can apply 'unique'
+        directly to this array.
+    w0: array-like of shape = [r, 1].
+    w1: array-like of shape = [r, 1].
+    
+    Returns:
+    ---------------
+    cls_error: classification error for current iteration.
+    updated_decision: decision table for current classifier
+    
+    """
+    unique_groups, inverse_index = np.unique(hashed_table, 
+                                             return_inverse=True)
+    sum0 = []                                         
+    sum1 = []
+    for g in unique_groups:
+        sum0.append(w0[hashed_table == g].sum())
+        sum1.append(w1[hashed_table == g].sum())
+    cls_error = error(sum0, sum1)
+    hashed_decision = make_decision(sum0, sum1)
+    updated_decision = hashed_decision[inverse_index]
+    return cls_error, updated_decision
+
 
 def unique_rows(Table):
     """ This is a utility function to return unique rows in a given table.
