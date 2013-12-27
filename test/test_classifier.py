@@ -34,8 +34,8 @@ def test_update_table():
     #exp_w0 /= _sum
     #exp_w1 /= _sum
     res_w0, res_w1 = cl.update_table(w0, w1, 0.5, dec)
-    nt.assert_allclose(exp_w0, res_w0)
-    nt.assert_allclose(exp_w1, res_w1)
+    nt.assert_allclose(res_w0, exp_w0)
+    nt.assert_allclose(res_w1, exp_w1)
     
 def test_apply_transform():
     hashed_table = np.array([0, 1, 2, 0, 1], dtype=np.int)
@@ -46,8 +46,8 @@ def test_apply_transform():
     expected_error = sum0.sum()
     expected_table = np.ones(5)
     _error, _table = cl._apply_transform(hashed_table, w0, w1)
-    nt.assert_almost_equal(expected_error, _error)
-    nt.assert_allclose(expected_table, _table)
+    nt.assert_almost_equal(_error, expected_error)
+    nt.assert_allclose(_table, expected_table)  
     del w0, w1, sum0, sum1, expected_error, expected_table, _error, _table
     w0 = np.array([0.13,  0.05, 0.08, 0.15, 0.2])
     w1 = np.array([0.02,  0.05, 0.02, 0.05, 0.25])
@@ -56,8 +56,21 @@ def test_apply_transform():
     expected_error = sum1[0] + sum0[1] + sum1[2]
     expected_table = np.array([0, 1, 0, 0, 1])
     _error, _table = cl._apply_transform(hashed_table, w0, w1)
-    nt.assert_almost_equal(expected_error, _error)
-    nt.assert_allclose(expected_table, _table)
+    nt.assert_almost_equal(_error, expected_error)
+    nt.assert_allclose(_table, expected_table)
+    
+    
+def test_product_hash():
+    table = np.array([[0, 0, 0, 1],
+                      [0, 1, 1, 0],
+                      [1, 0, 1, 0],
+                      [1, 1, 0, 1],
+                      [1, 1, 1, 1],
+                      [1, 1, 0, 0],
+                      [0, 0, 1, 1]])
+    expected = np.array([8, 6, 5, 11, 15, 3, 12])
+    result = cl._product_hash(table)
+    nt.assert_allclose(result, expected)
 
     
     

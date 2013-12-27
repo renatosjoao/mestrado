@@ -214,9 +214,10 @@ def _apply_transform(hashed_table, w0, w1):
     Returns:
     ---------------
     cls_error: classification error for current iteration.
-    updated_decision: decision table for current classifier
+    updated_decision: decision table for current classifier.
     
     """
+    # TODO: think of a better name for this function
     unique_groups, inverse_index = np.unique(hashed_table, 
                                              return_inverse=True)
     sum0 = []                                         
@@ -229,6 +230,28 @@ def _apply_transform(hashed_table, w0, w1):
     updated_decision = hashed_decision[inverse_index]
     return cls_error, updated_decision
 
+def _product_hash(table):
+    """
+    This function hashes each row of the input table by means of a dot
+    product with a vector of coefficients. Potentially very slow.
+    
+    
+    Parameters:
+    -------------
+    table: array-like of shape = [r, s].
+        Each row of the table is a binary pattern (e.g. [0, 0, 1, 0, 1]).
+        
+    
+    Returns:
+    -------------
+    hashed_table: array-like of shape = [r, 1].    
+       
+    """
+    _, ncols = table.shape
+    coeff = 2**np.arange(ncols)
+    hashed_table = np.dot(table, coeff)
+    return hashed_table
+    
 
 def unique_rows(Table):
     """ This is a utility function to return unique rows in a given table.
