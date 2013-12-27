@@ -181,7 +181,7 @@ def sel_car(Table, w0, w1):
     subset = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
     return subset
 
-def update_table(w0,w1,betha_t,decTable):#betha
+def update_table(w0, w1, betha_t, decTable): #betha
     """ This is just a utility function to update the table
     of weights given the betha_t value
 
@@ -209,13 +209,14 @@ def update_table(w0,w1,betha_t,decTable):#betha
         Label 1 frequency table updated.
 
     """
+    # TODO: the returned table is not normalized; should it that way?
     t = 0
-    for i,j,k in zip(w0,w1,decTable):
+    for i, j, k in zip(w0, w1, decTable):
         if k == 0:
-            w0[t] = i * betha_t
+            w0[t] = i*betha_t
         else:
-            w1[t] = j * betha_t
-        t = t +1
+            w1[t] = j*betha_t
+        t = t + 1
     return w0, w1
 
 def unique_rows(Table):

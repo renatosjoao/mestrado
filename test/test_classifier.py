@@ -24,4 +24,19 @@ def test_error():
     e0 = cl.error(w0, w1)
     nt.assert_almost_equal(e0, expected_error)
     
+def test_update_table():
+    pass
+    w0 =  np.array([.2,  0.25, 0.02, 0.04])
+    w1 =  np.array([.25, 0.2,  0.02, 0.02])
+    dec = np.array([ 1,  0,    0,    1], dtype=np.int)
+    exp_w0 = np.array([.2,   0.125, 0.01, 0.04])
+    exp_w1 = np.array([.125, 0.2,   0.02, 0.01])
+    #_sum = exp_w0.sum() + exp_w1.sum()
+    #exp_w0 /= _sum
+    #exp_w1 /= _sum
+    res_w0, res_w1 = cl.update_table(w0, w1, 0.5, dec)
+    nt.assert_allclose(exp_w0, res_w0)
+    nt.assert_allclose(exp_w1, res_w1)
+    
+    
     
