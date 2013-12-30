@@ -63,7 +63,6 @@ def iteration_setup():
     nrows = w0.shape[0]
     ncols = 12
     table = np.random.binomial(1, p=0.3, size=(nrows, ncols))    
-    table.reshape((nrows, ncols))
     return table, w0, w1
     
 def _single_iteration(table, w0, w1):

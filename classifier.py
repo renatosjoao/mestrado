@@ -157,8 +157,8 @@ def normalize_table(w0, w1):
     return  w0/total, w1/total
 
 def apply_feature_selection(data, subset, w0, w1):
-    """This function performs one iteration of the learning algorithm, given the
-    indices of the input features selected for this iteration.
+    """This function performs one iteration of the learning algorithm, given 
+    as input the indices of the features selected for this iteration.
     The decision table for the classifier and the classification error for 
     this iteration are returned.
     As a byproduct, it also updates the weight vectors w0 and w1,
