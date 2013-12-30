@@ -30,25 +30,6 @@ def read_from_XPL(xpl_file_path):
     result = xplutil.read_xpl(xpl_file_path)
     return result
 
-def freq_sum(w0, w1):
-    """ This function is meant to sum all the elements from w0 and  w1.
-
-    Parameters
-    ----------
-    w0 : array-like of shape = [n, 1]
-        Label 0 frequency table.
-
-    w1 : array-like of shape = [n, 1]
-        Label 1 frequency table.
-
-    Returns
-    -------
-    np.sum([w0,w1]) : double value
-        Returns the sum for all w0,w1 values.
-
-    """
-    return np.sum([w0, w1])
-
 def error(w0, w1):
     """ This is a function to calculate the error for the current interaction
 
@@ -86,29 +67,6 @@ def beta_factor(epsilon_t):
     beta_t = epsilon_t / (1.0 - epsilon_t)
     return beta_t
 
-def create_freq_table(freq0, freq1):
-    """ This is a function to create a frequency table.
-
-    Parameters
-    ----------
-     freq0 : array-like of shape = [n, 1]
-       It is the original matrix with freq0.
-     freq1 : array-like of shape = [n, 1]
-       It is the original matrix with freq1.
-
-    Returns
-    -------
-    w0 : array-like of shape = [n, 1]
-        Label 0 frequency table.
-
-    w1 : array-like of shape = [n, 1]
-        Label 1 frequency table.
-
-    """
-    fsum = freq_sum(freq0, freq1)
-    w0 = freq0/fsum
-    w1 = freq1/fsum
-    return w0, w1
 
 def make_decision(w0, w1):
     """ This is a utility function to make a decision for each pattern
