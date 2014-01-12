@@ -121,6 +121,35 @@ def apply_feature_selection(data, subset, w0, w1):
     this iteration are returned.
     As a byproduct, it also updates the weight vectors w0 and w1,
     associated with (input pattern, desired label) combinations.
+
+    Parameters
+    ----------
+    data : array-like of shape = [n, m]
+            Original dataset. Each row is a different binary pattern.
+
+    subset : sequence of integers.
+       The sequence of indices indicating the selected features
+
+    w0 : array-like of shape = [n, 1]
+        Frequency of label 0.
+
+    w1 : array-like of shape = [n, 1]
+        Frequency of label 1.
+
+    Returns
+    -------
+    w0 : array-like of shape = [n, 1]
+        Updated and normalized frequency of label 0.
+
+    w1 : array-like of shape = [n, 1]
+        Updated and normalized frequency of label 1.
+
+    updated_decision : array-like of shape = [n, 1]
+        Updated decision table for current classifier.
+
+    cls_error : doule
+        Classification error for the current iteration.
+
     """
     subset_data = data[:, subset]
     hdata = _product_hash(subset_data)
