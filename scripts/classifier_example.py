@@ -28,27 +28,26 @@ def main(xpl_data, num_features=None, num_iterations=None, winfile=None):
     win = ".win"
     png = ".png"
 
-    for i in range(num_iterations):        
-       
-        indices, feature_list, _ = ft.cmim(data, w0, w1, num_features)        
- 
+    for i in range(num_iterations):
+
+        indices, feature_list, _ = ft.cmim(data, w0, w1, num_features)
+
         tw.to_window_file(indices, xpl_data.winshape, winfile+str(i)+win)
- 
+
         tw.to_image_file(indices,xpl_data.winshape, winfile+str(i)+png, scale=8)
- 
-        w0, w1, updated_decision, cls_error =  cl.apply_feature_selection(data, indices, w0, w1)  
-                
+
+        w0, w1 = cl.normalize_table(w0, w1)
+
+        w0, w1, updated_decision, cls_error =  cl.apply_feature_selection(data, indices, w0, w1)
+
         print "Classification error for the current iteraction = %.6lf" %cls_error
         
         error_list.append(cls_error)
  
         bt = cl.beta_factor(cls_error)
-        
+
         betha_list.append(bt)
-        
 
-
-        
 
 
         
