@@ -16,8 +16,10 @@ import trioswindow as tw
 import xplutil
 import classifier as cl
 import argparse
+import numpy as np
+import pickle
 
-def main(xpl_data, num_features=None, num_iterations=None, winfile=None):
+def main(xpl_data, num_features=None, num_iterations=None):
     height, width = xpl_data.winshape    
     data = xpl_data.data 
     w0 = xpl_data.freq0
@@ -40,7 +42,7 @@ def main(xpl_data, num_features=None, num_iterations=None, winfile=None):
 
         w0, w1, updated_decision, cls_error =  cl.apply_feature_selection(data, indices, w0, w1)
 
-        print "Classification error for the current iteraction = %.6lf" %cls_error
+        print "Classification error for %.d the current iteraction = %.6lf" %(i,cls_error)
         
         error_list.append(cls_error)
  
@@ -54,7 +56,7 @@ def main(xpl_data, num_features=None, num_iterations=None, winfile=None):
 if __name__ == "__main__":
      parser = argparse.ArgumentParser(description="Perform t iterations of the current ensemble algorithm on a given XPL file.")
 
-     parser.add_argument("-w", "--window", help="Trios window file name where to save the obtained window")
+     #parser.add_argument("-w", "--window", help="Trios window file name where to save the obtained window")
 
      parser.add_argument("-n", "--numfeatures", type=int, help="Maximum number of features")
 
@@ -67,7 +69,7 @@ if __name__ == "__main__":
      if args.filename:
          xpl_data = xplutil.read_xpl(args.filename)    
          
-         main(xpl_data, args.numfeatures, args.numiterations, args.window)
+         main(xpl_data, args.numfeatures, args.numiterations)
               
      else:
          print "Must provide input file name."
