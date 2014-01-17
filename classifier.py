@@ -250,4 +250,29 @@ def _product_hash(table):
     coeff = 2**np.arange(ncols)
     hashed_table = np.dot(table, coeff)
     return hashed_table
-    
+
+def _final_Hip(DEC, GVector):
+    """This function represents the final Adaboost hypothesis.
+
+    Parameters:
+    -------------
+    DEC: array-like of shape = [n, m].
+        Each column of the table is the decision table for one iteration.
+        Each row is associated with a pattern
+
+    GVector: array-like of shape = [n, 1].
+
+    Returns:
+    -------------
+    H: array-like of shape = [n, 1].
+        Each element of the table row is a binary output associated with a
+        given pattern  input.
+
+    """
+    S = np.dot(DEC,GVector)
+    #S = D*GVector
+    Ones = np.ones(DEC.shape)
+    #Q = (1-D)*GVector
+    Q = np.dot(np.subtract(Ones,DEC),GVector)
+    H  = np.argmax((Q,S,), axis=0)
+    return H

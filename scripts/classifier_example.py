@@ -25,7 +25,9 @@ def main(xpl_data, num_features=None, num_iterations=None):
     w0 = xpl_data.freq0
     w1 = xpl_data.freq1
     error_list = []
-    betha_list = []
+    DEC = np.zeros(w0.shape)
+    GVector = []
+    i=0
     winfile = "window_"
     win = ".win"
     png = ".png"
@@ -42,15 +44,21 @@ def main(xpl_data, num_features=None, num_iterations=None):
 
         w0, w1, updated_decision, cls_error =  cl.apply_feature_selection(data, indices, w0, w1)
 
-        print "Classification error for %.d the current iteraction = %.6lf" %(i,cls_error)
-        
         error_list.append(cls_error)
- 
+
         bt = cl.beta_factor(cls_error)
 
-        betha_list.append(bt)
+        gam = np.log(1/bt)
+        GVector = np.append(GVector,gam)
 
+        #DEC represents the Decision Table. Each column represents the decision
+        #for an iteration
+        DEC = np.column_stack((DEC,updated_decision))
 
+    #Must delete the first column because it contains only Zeros as it was initialized with np.zeros()
+    DEC = np.delete(DEC,0, axis=1)
+
+    Hip = cl._final_Hip(DEC, GVector)
 
         
 if __name__ == "__main__":
