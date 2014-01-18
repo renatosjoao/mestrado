@@ -60,11 +60,15 @@ def main(xpl_data, num_features=None, num_iterations=None):
 
     Hip = cl._final_Hip(DEC, GVector)
 
+    dataset = cl.read_from_XPL("/home/rsjoao/git/mestrado/scripts/drive3x3.xpl")
+
+    w0, w1 = cl.normalize_table(dataset.freq0,dataset.freq1)
+
+    print cl._final_Error(Hip,w0, w1)
+
         
 if __name__ == "__main__":
      parser = argparse.ArgumentParser(description="Perform t iterations of the current ensemble algorithm on a given XPL file.")
-
-     #parser.add_argument("-w", "--window", help="Trios window file name where to save the obtained window")
 
      parser.add_argument("-n", "--numfeatures", type=int, help="Maximum number of features")
 

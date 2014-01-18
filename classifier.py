@@ -276,3 +276,27 @@ def _final_Hip(DEC, GVector):
     Q = np.dot(np.subtract(Ones,DEC),GVector)
     H  = np.argmax((Q,S,), axis=0)
     return H
+
+def _final_Error(Hip,w0, w1):
+    """This function calculates the final ensemble error.
+
+    Parameters:
+    -------------
+    Hip: array-like of shape = [n, 1].
+        Each row is the decision from the enxemble associated with a
+        corresponding pattern input
+
+    w0 : array-like of shape = [n, 1]
+        Label 0 frequency table.
+
+    w1 : array-like of shape = [n, 1]
+        Label 1 frequency table.
+
+    Returns:
+    -------------
+    error: float.
+        Error value
+
+    """
+    error = w0[Hip ==1].sum() + w1[Hip==0].sum()
+    return error
