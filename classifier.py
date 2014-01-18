@@ -31,7 +31,7 @@ def read_from_XPL(xpl_file_path):
     return result
 
 def error(w0, w1):
-    """ This is a function to calculate the error for the current interaction
+    """ This is a function to calculate the error for the current iteration
 
     Parameters
     ----------
@@ -251,40 +251,43 @@ def _product_hash(table):
     hashed_table = np.dot(table, coeff)
     return hashed_table
 
-def _final_Hip(DEC, GVector):
-    """This function represents the final Adaboost hypothesis.
+def adaboost_decision(dec_tables, weights):
+    """Calculates the final AdaBoost decision table (i.e. the output labels of each training pattern) given
+    the intermediate decision tables and the respective weights.
 
     Parameters:
     -------------
-    DEC: array-like of shape = [n, m].
+    dec_tables: array-like of shape = [n, m].
         Each column of the table is the decision table for one iteration.
         Each row is associated with a pattern
 
-    GVector: array-like of shape = [n, 1].
+    weights: array-like of shape = [n, 1].
 
     Returns:
     -------------
-    H: array-like of shape = [n, 1].
+    final_dec_table: array-like of shape = [n, 1].
         Each element of the table row is a binary output associated with a
         given pattern  input.
 
     """
-    S = np.dot(DEC,GVector)
-    #S = D*GVector
-    Ones = np.ones(DEC.shape)
-    #Q = (1-D)*GVector
-    Q = np.dot(np.subtract(Ones,DEC),GVector)
-    H  = np.argmax((Q,S,), axis=0)
-    return H
+    scores_ones = np.dot(dec_tables, weights)
+    nrows, _ = dec_tables.shape
+    final_dec_table = np.zeros(nrows)
+    ones_indices = (weights.sum() - scores_ones) < scores_ones
+    final_dec_table[ones_indices] = 1
+    return final_dec_table
 
-def _final_Error(Hip,w0, w1):
-    """This function calculates the final ensemble error.
+def mae_from_distribution(dec_table, w0, w1):
+    """Calculates MAE (Mean Absolute Error) given a decision table and the distribution of output values in the
+    data. Input parameters w0 and w1 should be normalized, i.e., sum(w0) + sum (w1) == 1. All three input parameters
+    should follow the same ordering, i.e., dec_table[i], w0[i] and w1[i] should all refer to the same input pattern.
+
 
     Parameters:
     -------------
-    Hip: array-like of shape = [n, 1].
-        Each row is the decision from the enxemble associated with a
-        corresponding pattern input
+    dec_table: array-like of shape = [n, 1].
+        A binary (0, 1) vector. Each row represents the classifier decision associated with one given
+        input pattern.
 
     w0 : array-like of shape = [n, 1]
         Label 0 frequency table.
@@ -295,8 +298,8 @@ def _final_Error(Hip,w0, w1):
     Returns:
     -------------
     error: float.
-        Error value
+        MAE value
 
     """
-    error = w0[Hip ==1].sum() + w1[Hip==0].sum()
+    error = w0[dec_table == 1].sum() + w1[dec_table == 0].sum()
     return error
