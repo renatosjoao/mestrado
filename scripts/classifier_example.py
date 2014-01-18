@@ -20,10 +20,10 @@ import numpy as np
 import pickle
 
 def main(xpl_data, num_features=None, num_iterations=None):
-    height, width = xpl_data.winshape    
-    data = xpl_data.data 
-    w0 = xpl_data.freq0
-    w1 = xpl_data.freq1
+    data = xpl_data.data
+    # copies frequency data as original frequencies are used towards the end to estimate training error
+    w0 = xpl_data.freq0.copy()
+    w1 = xpl_data.freq1.copy()
     error_list = []
     DEC = np.zeros(w0.shape)
     GVector = []
@@ -58,17 +58,15 @@ def main(xpl_data, num_features=None, num_iterations=None):
     #Must delete the first column because it contains only Zeros as it was initialized with np.zeros()
     DEC = np.delete(DEC,0, axis=1)
 
-    Hip = cl._final_Hip(DEC, GVector)
+    hypothesis = cl.adaboost_decision(DEC, GVector)
 
-    dataset = cl.read_from_XPL("/home/rsjoao/git/mestrado/scripts/drive3x3.xpl")
+    w0_train, w1_train = cl.normalize_table(xpl_data.freq0, xpl_data.freq1)
 
-    w0, w1 = cl.normalize_table(dataset.freq0,dataset.freq1)
-
-    print cl._final_Error(Hip,w0, w1)
+    print cl.mae_from_distribution(hypothesis,w0_train, w1_train)
 
         
 if __name__ == "__main__":
-     parser = argparse.ArgumentParser(description="Perform t iterations of the current ensemble algorithm on a given XPL file.")
+     parser = argparse.ArgumentParser(description="Perform t iterations of the ensemble algorithm on a given XPL file.")
 
      parser.add_argument("-n", "--numfeatures", type=int, help="Maximum number of features")
 

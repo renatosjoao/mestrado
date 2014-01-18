@@ -73,8 +73,37 @@ def test_product_hash():
     nt.assert_allclose(result, expected)
 
     
-    
-    
+def test_mae():
+    w0 = np.array([0.5,   0.125])
+    w1 = np.array([0.125, (1 - 0.5 - 2*0.125)])
+    d1 = np.array([0, 0])
+    d2 = np.array([0, 1])
+    d3 = np.array([1, 0])
+    d4 = np.array([1, 1])
+    nt.assert_almost_equal(cl.mae_from_distribution(d1, w0, w1),
+                           w1.sum())
+    nt.assert_almost_equal(cl.mae_from_distribution(d2, w0, w1),
+                           w1[0] + w0[1])
+    nt.assert_almost_equal(cl.mae_from_distribution(d3, w0, w1),
+                           w0[0] + w1[1])
+    nt.assert_almost_equal(cl.mae_from_distribution(d4, w0, w1),
+                           w0.sum())
+
+
+def test_adaboost_decision():
+    dec_tables = np.array([[0, 0],
+                           [0, 1],
+                           [1, 0],
+                           [1, 1]])
+    weights_1 = np.array([0.4, 0.6])
+    t1 = cl.adaboost_decision(dec_tables, weights_1)
+    expected_t1 = np.array([0, 1, 0, 1])
+    nt.assert_array_equal(t1, expected_t1)
+    weights_2 = np.array([0.7, 0.3])
+    t2 = cl.adaboost_decision(dec_tables, weights_2)
+    expected_t2 = np.array([0, 0, 1, 1])
+    nt.assert_array_equal(t2, expected_t2)
+
 
     
     
