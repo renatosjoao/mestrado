@@ -110,8 +110,8 @@ def joint_entropy(candidate, selected, freq0, freq1):
     Total = T0 + T1
     logTotal = np.log2(Total)
     index = 2*candidate + selected
-    hist_y0 = np.zeros(4, dtype=np.int32)
-    hist_y1 = np.zeros(4, dtype=np.int32)
+    hist_y0 = np.zeros(4, dtype=np.float64)
+    hist_y1 = np.zeros(4, dtype=np.float64)
     for i in range(4):
         hist_y0[i] = freq0[index==i].sum()
         hist_y1[i] = freq1[index==i].sum()
@@ -287,8 +287,7 @@ def make_fs(forward, add_feature=default_add):
             #print "Appending features"
             add_feature(features, curr_best, dataset)
         indices = [el.pos for el in features]
-        reordered_data = data[:, indices]
-        return indices, features, reordered_data
+        return indices, features, data
     return internal_cmim
 
 def _candidate_forward_cmim(candidate, features, dataset, score):
