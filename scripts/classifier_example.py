@@ -19,7 +19,7 @@ import argparse
 import numpy as np
 import pickle
 
-def main(xpl_data, num_features=None, num_iterations=None):
+def main(xpl_data, num_features=None, num_iterations=None, save_todir=None):
     data = xpl_data.data
     # copies frequency data as original frequencies are used towards the end to estimate training error
     w0 = xpl_data.freq0.copy()
@@ -32,17 +32,23 @@ def main(xpl_data, num_features=None, num_iterations=None):
     win = ".win"
     png = ".png"
 
+    file = open(save_todir+"iteration_error.txt", "w")
+
     for i in range(num_iterations):
 
         indices, feature_list, _ = ft.cmim(data, w0, w1, num_features)
 
-        tw.to_window_file(indices, xpl_data.winshape, winfile+str(i)+win)
+        tw.to_window_file(indices, xpl_data.winshape, save_todir+winfile+str(i)+win)
 
-        tw.to_image_file(indices,xpl_data.winshape, winfile+str(i)+png, scale=8)
+        tw.to_image_file(indices,xpl_data.winshape, save_todir+winfile+str(i)+png, scale=8)
 
         w0, w1 = cl.normalize_table(w0, w1)
 
         w0, w1, updated_decision, cls_error =  cl.apply_feature_selection(data, indices, w0, w1)
+
+        str_to_file = "Classification error for iteration " + str(i) +" = "+ str(cls_error) +".\n"
+
+        file.write(str_to_file)
 
         error_list.append(cls_error)
 
@@ -62,9 +68,13 @@ def main(xpl_data, num_features=None, num_iterations=None):
 
     w0_train, w1_train = cl.normalize_table(xpl_data.freq0, xpl_data.freq1)
 
-    print cl.mae_from_distribution(hypothesis,w0_train, w1_train)
+    MAE = cl.mae_from_distribution(hypothesis,w0_train, w1_train)
+    str_to_file = "Final MAE = "+str(MAE)
+    file.write(str_to_file)
+    print MAE
 
-        
+    file.close()
+
 if __name__ == "__main__":
      parser = argparse.ArgumentParser(description="Perform t iterations of the ensemble algorithm on a given XPL file.")
 
@@ -74,12 +84,14 @@ if __name__ == "__main__":
 
      parser.add_argument("filename", help="XPL filename")
      
+     parser.add_argument("-s", "--savetodir", help="Directory to save window files.")
+
      args = parser.parse_args()
      
      if args.filename:
          xpl_data = xplutil.read_xpl(args.filename)    
          
-         main(xpl_data, args.numfeatures, args.numiterations)
+         main(xpl_data, args.numfeatures, args.numiterations, args.savetodir) 
               
      else:
          print "Must provide input file name."
