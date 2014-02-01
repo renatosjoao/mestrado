@@ -345,9 +345,9 @@ def write_minterm_File(fname, pixels, winshape, wpattern, dec_table):
     for row in range(winh):
         f.write(" ".join([str(el) for el in c[row, :]]))
         f.write("\n")
-    f.write('.f \n')
+    #f.write('.f \n')
     f.write('.d \n')
     for row,rj in zip(wpattern,dec_table):
         _hex =  hex(int(''.join(map(str, row)),2))
-        f.write("%s %d \n" %(_hex,rj))
+        f.write("%s %d \n" %(_hex[2:],rj))
     f.close()
