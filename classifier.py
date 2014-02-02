@@ -332,7 +332,7 @@ def write_minterm_File(fname, pixels, winshape, wpattern, dec_table):
     winw = int(winshape[1])
     f = open(fname, 'w')
     f.write('MINTERM ########################################################\n')       #file header
-    f.write('.t 0\n')           # type (BB)
+    f.write('.t 0\n')           # type (BB) binary to binary
     f.write('.n %d \n' %wpattern.shape[0])          # nmtm
     f.write('.W \n')
     f.write('.h %d \n' %winh)   # window matrix height
@@ -345,9 +345,11 @@ def write_minterm_File(fname, pixels, winshape, wpattern, dec_table):
     for row in range(winh):
         f.write(" ".join([str(el) for el in c[row, :]]))
         f.write("\n")
-    #f.write('.f \n')
+    f.write('.f \n')
+    f.write('%d 0 %d 1 0 \n' %(np.sum(dec_table==0),np.sum(dec_table==1)))
+    f.write('.p \n')
     f.write('.d \n')
     for row,rj in zip(wpattern,dec_table):
         _hex =  hex(int(''.join(map(str, row)),2))
-        f.write("%s %d \n" %(_hex[2:],rj))
+        f.write("%s %d 0\n" %(_hex[2:],rj))
     f.close()
