@@ -34,7 +34,7 @@ def main(xpl_data, num_features=None, num_iterations=None, save_todir=None):
     winfile = "window_"
     win = ".win"
     png = ".png"
-
+    w0_train, w1_train = cl.normalize_table(xpl_data.freq0, xpl_data.freq1)
     file = open(save_todir+"Error.txt", "w")
 
     for i in range(num_iterations):
@@ -55,7 +55,7 @@ def main(xpl_data, num_features=None, num_iterations=None, save_todir=None):
         aux_dec = DEC
         aux_dec = np.delete(aux_dec,0, axis=1)
         hypothesis = cl.adaboost_decision(aux_dec, GVector)
-        MAE_t = cl.mae_from_distribution(hypothesis,w0, w1)
+        MAE_t = cl.mae_from_distribution(hypothesis,w0_train, w1_train)
         mae_list = np.append(mae_list,MAE_t)
         str_to_file = "MAE for iteration " + str(i) +" = "+ str(MAE_t) +".\n\n"
         file.write(str_to_file)
@@ -65,7 +65,7 @@ def main(xpl_data, num_features=None, num_iterations=None, save_todir=None):
     DEC = np.delete(DEC,0, axis=1)
     
     hypothesis = cl.adaboost_decision(DEC, GVector)
-    w0_train, w1_train = cl.normalize_table(xpl_data.freq0, xpl_data.freq1)    
+     
     MAE = cl.mae_from_distribution(hypothesis,w0_train, w1_train)
     str_to_file = "Final MAE = "+str(MAE)
     file.write(str_to_file)
