@@ -333,11 +333,11 @@ def write_minterm_File(fname, pixels, winshape, wpattern, dec_table):
     f = open(fname, 'w')
     f.write('MINTERM ########################################################\n')       #file header
     f.write('.t 0\n')           # type (BB) binary to binary
-    f.write('.n %d \n' %wpattern.shape[0])          # nmtm
+    f.write('.n %d\n' %wpattern.shape[0])          # nmtm
     f.write('.W \n')
-    f.write('.h %d \n' %winh)   # window matrix height
-    f.write('.w %d \n' %winw)   # window matrix width
-    f.write('.d \n')
+    f.write('.h %d\n' %winh)   # window matrix height
+    f.write('.w %d\n' %winw)   # window matrix width
+    f.write('.d\n')
     c = np.zeros(winlen, np.int16)
     idx = np.array(pixels, np.int32)
     c[idx] = 1
@@ -345,12 +345,41 @@ def write_minterm_File(fname, pixels, winshape, wpattern, dec_table):
     for row in range(winh):
         f.write(" ".join([str(el) for el in c[row, :]]))
         f.write("\n")
-    f.write('.f \n')
-    f.write('%d 0 %d 1 0 \n' %(np.sum(dec_table==0),np.sum(dec_table==1)))
-    f.write('.p \n')
-    f.write('.d \n')
+    f.write('.f\n')
+    f.write('%d 0 %d 1 0\n' %(np.sum(dec_table==0),np.sum(dec_table==1)))
+    f.write('.p\n')
+    f.write('.d\n')
     for row,rj in zip(wpattern,dec_table):
         row = row[::-1]
         _hex =  hex(int(''.join(map(str, row)),2))
-        f.write("%s %d %d %d\n" %(_hex[2:],rj,1,1))
+        f.write("%s %d %d %d\n" %(_hex[2:],rj,0,0))
     f.close()
+
+def _apply_projection(table, indices):
+    """
+    This utility function is meant to help in applying the projection on the original
+    table and selecting the columns specified by indices. After reducing the dimension of
+    the original table it removes duplicate patterns.
+
+     Parameters:
+    -------------
+    table: array-like of shape = [n, m].
+        Each row of the table is a binary pattern (e.g. [0, 0, 1, 0, 1]).
+
+    indices : sequence of integers.
+       The sequence of indices indicating the selected features.
+
+    Returns:
+    -------------
+     unique_array: array-like of shape = [n, m].
+        Each row of the table is a binary pattern (e.g. [0, 0, 1, 0, 1]).
+        The returned table does not have repeated patterns.
+     unique_idx: sequence of integers.
+        Sequence of integer representing the row index.
+
+    """
+    subset = table[:, indices]
+    temp = subset.ravel().view(np.dtype((np.void, subset.dtype.itemsize*subset.shape[1])))
+    _, unique_idx = np.unique(temp, return_index=True)
+    unique_array = subset[np.sort(unique_idx)]
+    return unique_array,unique_idx
