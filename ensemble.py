@@ -78,24 +78,24 @@ def train(self, XPL, n_features, n_iterations, dirpath):
 
 
 
-    def plot_MAE(xaxis, yaxis):
-        """ This is a function to plot the MAE per iteration graph.
+def plot_MAE(xaxis, yaxis):
+    """ This is a function to plot the MAE per iteration graph.
 
-        Parameters
-        ----------
+    Parameters
+    ----------
         xaxis : array-like of shape = [n, 1]
             Iterations
-    
+
         yaxis : array-like of shape = [n, 1]
             MAEs
         """
 
-        plot(xaxis,yaxis)
-        xlabel('Iteration (t)')
-        ylabel('MAE')
-        title('MAE per iteration')
-        grid(True)
-        show()
+    plot(xaxis,yaxis)
+    xlabel('Iteration (t)')
+    ylabel('MAE')
+    title('MAE per iteration')
+    grid(True)
+    show()
 
-    def predict(self, Xdata):
-        return 0 #( TO BE IMPLEMENTED)
+def predict(self, Xdata):
+    return 0 #( TO BE IMPLEMENTED)
