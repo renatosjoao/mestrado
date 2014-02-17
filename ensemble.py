@@ -10,13 +10,14 @@ __date__ = "$Date: 2014// $"
 __copyright__ = "Copyright (c) 2013 Renato SJ"
 __license__ = "Python"
 
+
+import _mypath
 import feature as ft
 import xplutil
 import classifier as clf
 import numpy as np
 import trioswindow as trios
 from pylab import *
-
 
 class Ensemble(object):
 
@@ -77,6 +78,24 @@ def train(self, XPL, n_features, n_iterations, dirpath):
     return Ensemble(XPL, win, n_features, n_iterations, error_list, mae_list,dirpath)
 
 
+def min_empirical_error(xpldata):
+    """
+    Given the data originally from a XPL file the minimal empirical error
+    is a value threshold for overfitting reference.
+
+    Parameters
+    ----------
+    xpldata : ExampleData(data, freq0, freq1, winshape, windata, filename)
+            Same as xplutil returns.
+
+    Returns
+    -------
+    err : double
+        The error value.
+    """
+    w0, w1 = clf.normalize_table(xpldata.freq0, xpldata.freq1)
+    err  = clf.error(w0,w1)
+    return err
 
 def plot_MAE(xaxis, yaxis):
     """ This is a function to plot the MAE per iteration graph.
