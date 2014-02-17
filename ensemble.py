@@ -21,8 +21,8 @@ from pylab import *
 
 class Ensemble(object):
 
-    def __init__(self, xpl_file, win, n_features, n_iterations, error_list, mae_list, dirpath):
-        self.xpl_file = xpl_file
+    def __init__(self, xpl_data, win, n_features, n_iterations, error_list, mae_list, dirpath):
+        self.xpl_data = xpl_data
         self.win = win
         self.n_features = n_features
         self.n_iterations = n_iterations
@@ -30,8 +30,7 @@ class Ensemble(object):
         self.mae_list = mae_list
         self.dirpath = dirpath
 
-def train(self, XPL, n_features, n_iterations, dirpath):
-    xpl_data = xplutil.read_xpl(XPL)
+def train(xpl_data, n_features, n_iterations, dirpath):
     Xdata = xpl_data.data
     win = xpl_data.windata
     # copies frequency data as original frequencies are used towards the end to estimate training error
@@ -53,9 +52,9 @@ def train(self, XPL, n_features, n_iterations, dirpath):
         w0, w1, updated_decision, cls_error =  clf.apply_feature_selection(Xdata, indices, w0, w1)
         unique_array, unique_index = clf._apply_projection(Xdata, indices)
         clf.write_minterm_File(dirpath+"mtm"+str(i),indices, xpl_data.winshape, unique_array,updated_decision[unique_index])
-        str_to_file = "Classification error for iteration " + str(i) +" = "+ str(cls_error) +".\n"
-        file.write(str_to_file)
-        self.error_list.append(cls_error)
+        #str_to_file = "Classification error for iteration " + str(i) +" = "+ str(cls_error) +".\n"
+        #file.write(str_to_file)
+        error_list.append(cls_error)
         bt = clf.beta_factor(cls_error)
         gam = np.log(1/bt)
         GVector = np.append(GVector,gam)
@@ -65,7 +64,7 @@ def train(self, XPL, n_features, n_iterations, dirpath):
         aux_dec = np.delete(aux_dec,0, axis=1)
         hypothesis = clf.adaboost_decision(aux_dec, GVector)
         MAE_t = clf.mae_from_distribution(hypothesis,w0_train, w1_train)
-        self.mae_list = np.append(self.mae_list,MAE_t)
+        mae_list = np.append(mae_list,MAE_t)
         str_to_file = "MAE for iteration " + str(i) +" = "+ str(MAE_t) +".\n\n"
         file.write(str_to_file)
     #Must delete the first column because it contains only Zeros as it was initialized with np.zeros()
@@ -75,7 +74,7 @@ def train(self, XPL, n_features, n_iterations, dirpath):
     str_to_file = "Final MAE = "+str(MAE)
     file.write(str_to_file)
     file.close()
-    return Ensemble(XPL, win, n_features, n_iterations, error_list, mae_list,dirpath)
+    return Ensemble(xpl_data, win, n_features, n_iterations, error_list, mae_list,dirpath)
 
 
 def min_empirical_error(xpldata):
