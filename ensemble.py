@@ -12,15 +12,16 @@ __license__ = "Python"
 
 
 import _mypath
+import os.path
+import classifier as clf
 import feature as ft
 import xplutil
-import classifier as clf
 import numpy as np
-import trioswindow as trios
-from pylab import *
-from scipy import misc
+import trioswindow as triosw
+import pylab
+#from scipy import misc
 
-class Ensemble(object):
+class Ensemble:
 
     def __init__(self, xpl_data, win, n_features, n_iterations, error_list, mae_list, dirpath):
         self.xpl_data = xpl_data
@@ -30,6 +31,7 @@ class Ensemble(object):
         self.error_list = error_list
         self.mae_list = mae_list
         self.dirpath = dirpath
+
 
 def train(xpl_data, n_features, n_iterations, dirpath):
     Xdata = xpl_data.data
@@ -41,28 +43,26 @@ def train(xpl_data, n_features, n_iterations, dirpath):
     mae_list = []
     GVector = []
     DEC = np.zeros(w0.shape)
+    total = float(np.sum([w0, w1]))
+    w0_train = w0/total
+    w1_train = w1/total
 
-    w0_train, w1_train = clf.normalize_table(w0, w1)
     file = open(dirpath+"Error.txt", "w")
 
     for i in range(n_iterations):
         indices, feature_list, _ = ft.cmim(Xdata, w0, w1, n_features)
-        trios.to_window_file(indices, xpl_data.winshape, dirpath+"window_"+str(i)+".win")
-        trios.to_image_file(indices,xpl_data.winshape, dirpath+"window_"+str(i)+".png", scale=8)
-        w0, w1 = clf.normalize_table(w0, w1)
+        triosw.to_window_file(indices, xpl_data.winshape, dirpath+"window_"+str(i)+".win")
+        triosw.to_image_file(indices,xpl_data.winshape, dirpath+"window_"+str(i)+".png", scale=8)
+        total = float(np.sum([w0, w1]))
+        w0 = w0/total
+        w1 = w1/total
         w0, w1, updated_decision, cls_error =  clf.apply_feature_selection(Xdata, indices, w0, w1)
         unique_array, unique_index = clf._apply_projection(Xdata, indices)
-<<<<<<< HEAD
-        clf.write_minterm_File(dirpath+"mtm"+str(i),indices, xpl_data.winshape, unique_array,updated_decision[unique_index])
-        #str_to_file = "Classification error for iteration " + str(i) +" = "+ str(cls_error) +".\n"
-        #file.write(str_to_file)
-        error_list.append(cls_error)
-=======
         xplutil.write_minterm_file(dirpath+"mtm"+str(i),indices, xpl_data.winshape, unique_array,updated_decision[unique_index])
         str_to_file = "Classification error for iteration " + str(i) +" = "+ str(cls_error) +".\n"
         file.write(str_to_file)
-        self.error_list.append(cls_error)
->>>>>>> 6f2048cd0a15d9dfda8b8cc41f2181a00c42988d
+        error_list.append(cls_error)
+
         bt = clf.beta_factor(cls_error)
         gam = np.log(1/bt)
         GVector = np.append(GVector,gam)
@@ -108,7 +108,6 @@ def min_mae(observed_img, ideal_img):
     """
     Given the observed image data  and the ideal image data we calculate the
     mae as improvement threshold
-
     Parameters
     ----------
     observed_img:
@@ -139,12 +138,12 @@ def plot_MAE(xaxis, yaxis):
             MAEs
         """
 
-    plot(xaxis,yaxis)
-    xlabel('Iteration (t)')
-    ylabel('MAE')
-    title('MAE per iteration')
-    grid(True)
-    show()
+    pylab.plot(xaxis,yaxis)
+    pylab.xlabel('Iteration (t)')
+    pylab.ylabel('MAE')
+    pylab.title('MAE per iteration')
+    pylab.grid(True)
+    pylab.show()
 
 def predict(self, Xdata):
     return 0 #( TO BE IMPLEMENTED)
