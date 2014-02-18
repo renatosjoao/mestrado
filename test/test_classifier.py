@@ -120,12 +120,5 @@ def test_apply_projection():
     t,i = cl._apply_projection(table, index)
     expected_t = np.array([[0,0],[1,0],[0,1],[1,1]])
     nt.assert_array_equal(t , expected_t)
-<<<<<<< HEAD
     expected_i = np.array([0, 2, 3, 4])
     nt.assert_array_equal(i , expected_i)
-      
-    
-    
-=======
-      
->>>>>>> 6f2048cd0a15d9dfda8b8cc41f2181a00c42988d
