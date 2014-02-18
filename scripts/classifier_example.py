@@ -42,6 +42,8 @@ def main(xpl_data, num_features=None, num_iterations=None, save_todir=None):
         tw.to_image_file(indices,xpl_data.winshape, save_todir+winfile+str(i)+png, scale=8)
         w0, w1 = cl.normalize_table(w0, w1)
         w0, w1, updated_decision, cls_error =  cl.apply_feature_selection(data, indices, w0, w1)
+        unique_array, unique_index = cl._apply_projection(data, indices)
+        xplutil.write_minterm_file(save_todir+"mtm_"+str(i),indices, xpl_data.winshape,unique_array,updated_decision[unique_index])
         str_to_file = "Classification error for iteration " + str(i) +" = "+ str(cls_error) +".\n"
         file.write(str_to_file)
         error_list.append(cls_error)
@@ -58,7 +60,6 @@ def main(xpl_data, num_features=None, num_iterations=None, save_todir=None):
         mae_list = np.append(mae_list,MAE_t)
         str_to_file = "MAE for iteration " + str(i) +" = "+ str(MAE_t) +".\n\n"
         file.write(str_to_file)
-        xplutil.write_minterm_file(save_todir+"mtm_"+str(i),indices, xpl_data.winshape, data[:, indices], hypothesis)
 
     #Must delete the first column because it contains only Zeros as it was initialized with np.zeros()
     DEC = np.delete(DEC,0, axis=1)
