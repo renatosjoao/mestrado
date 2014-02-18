@@ -22,7 +22,6 @@ import graphics as gra
 
 def main(xpl_data, num_features=None, num_iterations=None, save_todir=None):
     data = xpl_data.data
-    
     # copies frequency data as original frequencies are used towards the end to estimate training error
     w0 = xpl_data.freq0.copy()
     w1 = xpl_data.freq1.copy()
@@ -59,19 +58,19 @@ def main(xpl_data, num_features=None, num_iterations=None, save_todir=None):
         mae_list = np.append(mae_list,MAE_t)
         str_to_file = "MAE for iteration " + str(i) +" = "+ str(MAE_t) +".\n\n"
         file.write(str_to_file)
-        cl.write_minterm_File(save_todir+"mtm_"+str(i),indices, xpl_data.winshape, data[:, indices], hypothesis)
+        xplutil.write_minterm_file(save_todir+"mtm_"+str(i),indices, xpl_data.winshape, data[:, indices], hypothesis)
 
     #Must delete the first column because it contains only Zeros as it was initialized with np.zeros()
     DEC = np.delete(DEC,0, axis=1)
-    
     hypothesis = cl.adaboost_decision(DEC, GVector)
      
-    MAE = cl.mae_from_distribution(hypothesis,w0_train, w1_train)
-    str_to_file = "Final MAE = "+str(MAE)
+    MAE = cl.mae_from_distribution(hypothesis, w0_train, w1_train)
+    str_to_file = "Final MAE = "+ str(MAE)
     file.write(str_to_file)
     #print MAE
     file.close()
     gra.plot_MAE_iter(np.array(range(num_iterations)), np.array(mae_list))
+
         
 if __name__ == "__main__":
      parser = argparse.ArgumentParser(description="Perform t iterations of the ensemble algorithm on a given XPL file.")

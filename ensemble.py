@@ -52,10 +52,17 @@ def train(xpl_data, n_features, n_iterations, dirpath):
         w0, w1 = clf.normalize_table(w0, w1)
         w0, w1, updated_decision, cls_error =  clf.apply_feature_selection(Xdata, indices, w0, w1)
         unique_array, unique_index = clf._apply_projection(Xdata, indices)
+<<<<<<< HEAD
         clf.write_minterm_File(dirpath+"mtm"+str(i),indices, xpl_data.winshape, unique_array,updated_decision[unique_index])
         #str_to_file = "Classification error for iteration " + str(i) +" = "+ str(cls_error) +".\n"
         #file.write(str_to_file)
         error_list.append(cls_error)
+=======
+        xplutil.write_minterm_file(dirpath+"mtm"+str(i),indices, xpl_data.winshape, unique_array,updated_decision[unique_index])
+        str_to_file = "Classification error for iteration " + str(i) +" = "+ str(cls_error) +".\n"
+        file.write(str_to_file)
+        self.error_list.append(cls_error)
+>>>>>>> 6f2048cd0a15d9dfda8b8cc41f2181a00c42988d
         bt = clf.beta_factor(cls_error)
         gam = np.log(1/bt)
         GVector = np.append(GVector,gam)
