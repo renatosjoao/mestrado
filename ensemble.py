@@ -18,6 +18,7 @@ import classifier as clf
 import numpy as np
 import trioswindow as trios
 from pylab import *
+from scipy import misc
 
 class Ensemble(object):
 
@@ -95,6 +96,29 @@ def min_empirical_error(xpldata):
     w0, w1 = clf.normalize_table(xpldata.freq0, xpldata.freq1)
     err  = clf.error(w0,w1)
     return err
+
+def min_mae(observed_img, ideal_img):
+    """
+    Given the observed image data  and the ideal image data we calculate the
+    mae as improvement threshold
+
+    Parameters
+    ----------
+    observed_img:
+         scipy misc.imread data
+
+    ideal_img:
+        scipy misc.imread data
+
+    Returns
+    -------
+    value : double
+
+    """
+    subset = np.absolute(ideal_img - observed_img)
+    nonzero = np.count_nonzero(subset)
+    value = nonzero/subset.size
+    return value
 
 def plot_MAE(xaxis, yaxis):
     """ This is a function to plot the MAE per iteration graph.
