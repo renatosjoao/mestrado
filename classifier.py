@@ -333,3 +333,4 @@ def _apply_projection(table, indices):
     _, unique_idx = np.unique(temp, return_index=True)
     unique_array = subset[np.sort(unique_idx)]
     return unique_array,unique_idx
+   
