@@ -12,11 +12,11 @@ Utility functions for dealing with xpl files.
 
 __docformat__ = 'reStructuredText'
 
-__all__ = ["read_xpl", "matrix_from_xpl", "parse_xpl "]
+__all__ = ["read_xpl", "matrix_from_xpl", "parse_xpl", "write_minterm_file"]
 
 import re
 import math
-import numpy
+import numpy as np
 
 def _debug(msg):
     print msg
@@ -51,7 +51,7 @@ _type_dict = {0:('BB', 'Binary x Binary'), 1:('BG', 'Binary x Grayscale'),
      4:('WKF', 'Limited Grayscale x Limited Grayscale')}
 
 
-def matrix_from_xpl(xpldata, dtype=numpy.uint8):
+def matrix_from_xpl(xpldata, dtype=np.uint8):
     """Turns xpl data into numpy arrays.
 
     The data conversion reverts the order of the xpl elements, so the returned
@@ -76,9 +76,9 @@ def matrix_from_xpl(xpldata, dtype=numpy.uint8):
             return 0
     def to_freqlist(key, xpl):
         return [frequency(key, el[1]) for el in xpldata]
-    data = numpy.array([to_numlist(el[0]) for el in xpldata], dtype=dtype)
-    freq0 = numpy.array(to_freqlist(0, xpldata))
-    freq1 = numpy.array(to_freqlist(1, xpldata))
+    data = np.array([to_numlist(el[0]) for el in xpldata], dtype=dtype)
+    freq0 = np.array(to_freqlist(0, xpldata))
+    freq1 = np.array(to_freqlist(1, xpldata))
     return data, freq0, freq1
 
 
@@ -233,11 +233,6 @@ def parse_examplesBB(xpl_lines, winshape):
     # considering that each column can represent up to 32 bits
     xplcols = int(math.ceil(float(winlen)/32))
 
-    # number of hexadecimal digits needed to represent the
-    # biggest number which can be indexed through a window
-    # of a given size
-    hexdigits = int(math.ceil(float(winlen)/4))
-
     for dataline in xpl_lines:
         elemlist = dataline.strip().split()
         if elemlist[-1] != "0":
@@ -339,7 +334,7 @@ def parse_xpl(filename):
 def matrix_from_windata(windata):
     data_tokens = [line_data.strip().split() for line_data in windata]
     data = [[int(elem) for elem in tokens] for tokens in data_tokens]
-    return numpy.array(data, dtype=numpy.uint8)
+    return np.array(data, dtype=np.uint8)
 
 
 class ExampleData(object):
@@ -369,6 +364,99 @@ def read_xpl(filename):
     result = ExampleData(data, freq0, freq1, winshape, windata, filename)
     return result
 
+def write_minterm_file(fname, pixels, winshape, wpattern, dec_table):
+    """
+    Writes MINTER file to disk
+
+    Parameters:
+    -------------
+    fname: string
+        The name of the output file.
+
+    pixels: array like of n elements.
+       The indices of pixels that belong to the window.
+
+    winshape: two-element sequence.
+        The shape of the window: (height, width)
+
+    wpattern: array-like of shape = [r, s].
+        Each row of the table is a binary pattern (e.g. [0, 0, 1, 0, 1]).
+
+    dec_table: array-like of shape = [n, 1].
+        A binary (0, 1) vector. Each row represents the classifier decision associated with one given
+        input pattern.
+
+    """
+    f = open(fname, 'w')
+    _write_minterm(f, pixels, winshape, wpattern, dec_table)
+    f.close()
+
+
+def _write_minterm(sink, pixels, winshape, wpattern, dec_table):
+    """
+    Outputs MINTER data into sink.
+
+    Parameters:
+    -------------
+    sink: file like
+        Sink that will receive the minterm data.
+
+    pixels: array like of n elements.
+       The indices of pixels that belong to the window.
+
+    winshape: two-element sequence.
+        The shape of the window: (height, width)
+
+    wpattern: array-like of shape = [r, s].
+        Each row of the table is a binary pattern (e.g. [0, 0, 1, 0, 1]).
+
+    dec_table: array-like of shape = [n, 1].
+        A binary (0, 1) vector. Each row represents the classifier decision associated with one given
+        input pattern.
+
+    """
+    winh = int(winshape[0])
+    winw = int(winshape[1])
+    winlen = winh*winw
+    sink.write('MINTERM ########################################################\n')       #file header
+    sink.write('.t 0\n')           # type (BB) binary to binary
+    sink.write('.n %d\n' % wpattern.shape[0])          # nmtm
+    sink.write('.W \n')
+    sink.write('.h %d\n' % winh)   # window matrix height
+    sink.write('.w %d\n' % winw)   # window matrix width
+    sink.write('.d\n')
+    c = np.zeros(winlen, np.int16)
+    idx = np.array(pixels, np.int32)
+    c[idx] = 1
+    c = c.reshape((winshape))
+    for row in range(winh):
+        sink.write(" ".join([str(el) for el in c[row, :]]))
+        sink.write("\n")
+    sink.write('.f\n')
+    sink.write('%d 0 %d 1 0\n' %(np.sum(dec_table==0), np.sum(dec_table==1)))
+    sink.write('.p\n')
+    sink.write('.d\n')
+    _write_minterm_data(sink, wpattern, dec_table)
+
+def _write_minterm_data(sink, wpattern, dec_table):
+    num_points = wpattern.shape[1]
+    num_columns = int(math.ceil(num_points/32.0))
+    for row, rj in zip(wpattern, dec_table):       
+        hex_columns = []      
+        for k in range(num_columns):
+            _end = min(num_points, (k+1)*32)
+            bin_data = row[k*32:_end]
+            bin_data = bin_data[::-1]
+            num_data = int(''.join(map(str, bin_data)), 2)
+            hex_string = hex(num_data)[2:]
+            if len(hex_string) == 9 and hex_string[8] == 'L':
+                hex_string = hex_string[:-1]
+            elif len(hex_string) > 9:
+                raise ValueError("Unexpected hex string: " + hex_string)
+            hex_columns.append(hex_string)
+        hex_string = " ".join(hex_columns)
+        sink.write("%s %d %d %d\n" % (hex_string, rj, 0, 0))
+    
 
 def _test():
     import doctest

@@ -304,56 +304,6 @@ def mae_from_distribution(dec_table, w0, w1):
     error = w0[dec_table == 1].sum() + w1[dec_table == 0].sum()
     return error
 
-def write_minterm_File(fname, pixels, winshape, wpattern, dec_table):
-    """
-    Writes MINTER file to disk
-
-    Parameters:
-    -------------
-    fname: string
-        The name of the output file.
-
-    pixels: array like of n elements.
-       The indices of pixels that belong to the window.
-
-    winshape: two-element sequence.
-        The shape of the window: (height, width)
-
-    wpattern: array-like of shape = [r, s].
-        Each row of the table is a binary pattern (e.g. [0, 0, 1, 0, 1]).
-
-    dec_table: array-like of shape = [n, 1].
-        A binary (0, 1) vector. Each row represents the classifier decision associated with one given
-        input pattern.
-
-    """
-    winlen = winshape[0]*winshape[1]
-    winh = int(winshape[0])
-    winw = int(winshape[1])
-    f = open(fname, 'w')
-    f.write('MINTERM ########################################################\n')       #file header
-    f.write('.t 0\n')           # type (BB) binary to binary
-    f.write('.n %d\n' %wpattern.shape[0])          # nmtm
-    f.write('.W \n')
-    f.write('.h %d\n' %winh)   # window matrix height
-    f.write('.w %d\n' %winw)   # window matrix width
-    f.write('.d\n')
-    c = np.zeros(winlen, np.int16)
-    idx = np.array(pixels, np.int32)
-    c[idx] = 1
-    c = c.reshape((winshape))
-    for row in range(winh):
-        f.write(" ".join([str(el) for el in c[row, :]]))
-        f.write("\n")
-    f.write('.f\n')
-    f.write('%d 0 %d 1 0\n' %(np.sum(dec_table==0),np.sum(dec_table==1)))
-    f.write('.p\n')
-    f.write('.d\n')
-    for row,rj in zip(wpattern,dec_table):
-        row = row[::-1]
-        _hex =  hex(int(''.join(map(str, row)),2))
-        f.write("%s %d %d %d\n" %(_hex[2:],rj,0,0))
-    f.close()
 
 def _apply_projection(table, indices):
     """
