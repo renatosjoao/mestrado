@@ -58,7 +58,7 @@ def main(xpl_data, num_features=None, num_iterations=None, save_todir=None):
         mae_list = np.append(mae_list,MAE_t)
         str_to_file = "MAE for iteration " + str(i) +" = "+ str(MAE_t) +".\n\n"
         file.write(str_to_file)
-        cl.write_minterm_File(save_todir+"mtm_"+str(i),indices, xpl_data.winshape, data[:, indices], hypothesis)
+        xplutil.write_minterm_file(save_todir+"mtm_"+str(i),indices, xpl_data.winshape, data[:, indices], hypothesis)
 
     #Must delete the first column because it contains only Zeros as it was initialized with np.zeros()
     DEC = np.delete(DEC,0, axis=1)
