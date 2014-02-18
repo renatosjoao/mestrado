@@ -379,7 +379,7 @@ def _apply_projection(table, indices):
 
     """
     subset = table[:, indices]
-    temp = subset.ravel().view(np.dtype((np.void, subset.dtype.itemsize*subset.shape[1])))
-    _, unique_idx = np.unique(temp, return_index=True)
-    unique_array = subset[np.sort(unique_idx)]
-    return unique_array,unique_idx
+    b = np.ascontiguousarray(subset).view(np.dtype((np.void, subset.dtype.itemsize * subset.shape[1])))
+    _, idx = np.unique(b, return_index=True)
+    u = subset[np.sort(idx)]
+    return u, np.sort(idx)
