@@ -28,9 +28,7 @@ int main(int argc, char* argv[]) {
     	  training_set_descr = argv[1];
     	  window_descr = argv[2];
     	  output_file = argv[3];
-
-    	  lcollec(training_set_descr,window_descr,NULL,1,1,0,output_file,NULL);
-
+    	  lcollec(training_set_descr,window_descr,NULL,1,1,1,output_file,NULL);
       }
 	return EXIT_SUCCESS;
 }
