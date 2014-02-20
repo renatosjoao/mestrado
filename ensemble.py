@@ -21,7 +21,7 @@ import pylab
 import matplotlib.pyplot as plt
 import subprocess
 import shlex
-#from scipy import misc
+from scipy import misc
 
 class Ensemble:
 
@@ -107,26 +107,34 @@ def min_empirical_error(xpldata):
     err  = clf.error(w0,w1)
     return err
 
-def min_mae(observed_img, ideal_img):
+def min_mae(imageset_list):
     """
     Given the observed image data  and the ideal image data we calculate the
     mae as improvement threshold
+
     Parameters
     ----------
-    observed_img:
-         scipy misc.imread data
-
-    ideal_img:
-        scipy misc.imread data
+    imageset_list: list
+        A list containing the imageset to be used for mae calculation.
+    i.e.
+    [('./dataset-map/map1bin.pnm', './dataset-map/map1bin.ide.pnm', './dataset-map/map1bin.pnm'),
+    ('./dataset-map/map2bin.pnm', './dataset-map/map2bin.ide.pnm', './dataset-map/map2bin.pnm'),
+    ('./dataset-map/map3bin.pnm', './dataset-map/map3bin.ide.pnm', './dataset-map/map3bin.pnm')]
 
     Returns
     -------
     value : double
 
     """
-    subset = np.absolute(ideal_img - observed_img)
-    nonzero = np.count_nonzero(subset)
-    value = nonzero/subset.size
+    sum_nonzero = 0
+    total_pix = 0
+    for row in imageset_list:
+        ideal = misc.imread(row[1])
+        observed = misc.imread(row[0])
+        subset = np.absolute(ideal - observed)
+        sum_nonzero += subset
+        total_pix += subset.size
+    value = sum_nonzero/total_pix
     return value
 
 def plot_MAE(xaxis, yaxis, dir):
