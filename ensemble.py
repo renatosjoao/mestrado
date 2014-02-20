@@ -126,13 +126,14 @@ def min_mae(imageset_list):
     value : double
 
     """
-    sum_nonzero = 0
-    total_pix = 0
+    sum_nonzero = 0.0
+    total_pix = 0.0
     for row in imageset_list:
         ideal = misc.imread(row[1])
         observed = misc.imread(row[0])
         subset = np.absolute(ideal - observed)
-        sum_nonzero += subset
+        nonzero = np.count_nonzero(subset)
+        sum_nonzero += nonzero
         total_pix += subset.size
     value = sum_nonzero/total_pix
     return value
