@@ -49,7 +49,7 @@ def train(xpl_data, n_features, n_iterations, dirpath):
     w0_train = w0/total
     w1_train = w1/total
 
-    file = open(dirpath+"MAE.txt", "w")
+    file = open(dirpath+"MAE_training.txt", "w")
 
     for i in range(n_iterations):
         indices, feature_list, _ = ft.cmim(Xdata, w0, w1, n_features)
@@ -87,6 +87,11 @@ def train(xpl_data, n_features, n_iterations, dirpath):
     plot_MAE(np.array(range(n_iterations)), np.array(mae_list), dirpath)
     return Ensemble(xpl_data, win, n_features, n_iterations, error_list, mae_list,dirpath)
 
+def write_min_empirical_error(filename, value):
+    f = open(filename, "w")
+    f.write(str(value))
+    f.close()
+    return 0
 
 def min_empirical_error(xpldata):
     """
@@ -167,7 +172,7 @@ def build_xpl(imgset, win, output):
     Parameters
     ----------
     imgset : string
-            The image set path for creatng the XPL file.
+            The image set path for creating the XPL file.
     win : string
             The path to the win file used to create the XPL file.
     output : string
