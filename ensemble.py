@@ -112,10 +112,10 @@ def min_empirical_error(xpldata):
     err  = clf.error(w0,w1)
     return err
 
-def min_mae(imageset_list):
+def generic_mae(imageset_list):
     """
-    Given the observed image data  and the ideal image data we calculate the
-    mae as improvement threshold
+    Given the list of observed and the ideal images data we calculate the
+    mae as an improvement threshol.d
 
     Parameters
     ----------
