@@ -64,7 +64,6 @@ def train(xpl_data, n_features, n_iterations, dirpath):
         #str_to_file = "Classification error for iteration " + str(i) +" = "+ str(cls_error) +".\n"
         #file.write(str_to_file)
         error_list.append(cls_error)
-
         bt = clf.beta_factor(cls_error)
         gam = np.log(1/bt)
         GVector = np.append(GVector,gam)
@@ -115,7 +114,7 @@ def min_empirical_error(xpldata):
 def generic_mae(imageset_list):
     """
     Given the list of observed and the ideal images data we calculate the
-    mae as an improvement threshol.d
+    mae as an improvement threshold.
 
     Parameters
     ----------
@@ -184,7 +183,7 @@ def build_xpl(imgset, win, output):
             True if the processing is sucessful
     """
     #trios_build_xpl must not be hardcoded !!!
-    cmd = "/home/rsjoao/git/trioslib-code/bin/trios_build_xpl %s %s %s" %(imgset, win, output)
+    cmd = "trios_build_xpl %s %s %s" %(imgset, win, output)
     cmd = shlex.split(cmd)
     process = subprocess.call(cmd)
     if process == 0:
@@ -214,7 +213,7 @@ def build_operator(win, mtm, output):
             The path to the output image operator.
     """
     #trios_build_operator must not be hardcoded !!!
-    cmd = "/home/rsjoao/git/trioslib-code/bin/trios_build_operator %s %s %s" %(win, mtm, output)
+    cmd = "trios_build_operator %s %s %s" %(win, mtm, output)
     cmd = shlex.split(cmd)
     process = subprocess.call(cmd)
     if process == 0:
@@ -256,7 +255,8 @@ def build_2level(imgset, operators, op_dir, fname):
             True if the processing is sucessful
     """
     ops = " ".join(op_dir+o for o in operators)
-    cmd = "/home/rsjoao/git/trioslib-code/bin/trios_build combine %s %s %s" %(ops, imgset, fname)
+    #trios_build must not be hardcoded !!!
+    cmd = "trios_build combine %s %s %s" %(ops, imgset, fname)
     cmd = shlex.split(cmd)
     process = subprocess.call(cmd)
     if process == 0:
@@ -283,7 +283,8 @@ def apply_operator(operator_path, img_path, result_path, mask=''):
     --------
             0 if the processing is sucessful.
     """
-    cmd = "/home/rsjoao/git/trioslib-code/bin/trios_apply %s %s %s %s"%(operator_path, img_path, result_path, mask)
+    #trios_apply must not be hardcoded !!!
+    cmd = "trios_apply %s %s %s %s"%(operator_path, img_path, result_path, mask)
     cmd = shlex.split(cmd)
     res = subprocess.call(cmd)
     if res != 0:
