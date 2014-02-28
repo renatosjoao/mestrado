@@ -333,3 +333,34 @@ def _apply_projection(table, indices):
     _, idx = np.unique(b, return_index=True)
     u = subset[np.sort(idx)]
     return u, np.sort(idx)
+
+def project(table, i):
+    """
+    This function projects the original table and selects the columns
+    specified by i.
+    It reduces the dimension of the original table and returns a dictionary
+    with the patterns and a list of occurrences for each pattern as well
+    as an array of unique elements.
+
+     Parameters:
+    -------------
+    table: array-like of shape = [n, m].
+        Each row of the table is a binary pattern (e.g. [0, 0, 1, 0, 1]).
+
+    i : sequence of integers.
+        The sequence of indices indicating the selected features.
+
+    Returns:
+    -------------
+    hash: a dictionary
+        A dictionary
+    unique_array: array-like of shape = [n, m].
+        Each row of the table is a binary pattern (e.g. [0, 0, 1, 0, 1]).
+        The returned table does not have repeated patterns.
+    """
+    hash = {}
+    subset = table[:, i]
+    unique_array, unique_index = _apply_projection(table, i)
+    for row in unique_array:
+        hash[tuple(row)] = np.where(np.all(row==subset,axis=1))
+    return hash, unique_array
