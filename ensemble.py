@@ -191,6 +191,18 @@ def build_xpl(imgset, win, output):
     else:
         raise Exception('Build XPL operation failed')
 
+def trios_build(win, imgset, fname):
+        """
+        Runs the training process for the Image Operator using the imageset passed in the parameters.
+        """
+        cmd = "trios_build single BB %s %s %s" %(win, imgset, fname)
+        cmd = shlex.split(cmd)
+        process = subprocess.call(cmd)
+        if process == 0:
+            return True
+        else:
+            raise Exception('Build operator failed')
+
 def build_operators(dirpath, n_iterations):
     for i in range(n_iterations):
         window = dirpath+"window_"+str(i)+".win"
