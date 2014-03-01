@@ -203,6 +203,18 @@ def trios_build(win, imgset, fname):
         else:
             raise Exception('Build operator failed')
 
+def trios_build_mtm(win, imgset, fname):
+        """
+        Creates a MTM file using the imageset and window given as arguments.
+        """
+        cmd = "trios_build_mtm %s %s %s" %(win, imgset, fname)
+        cmd = shlex.split(cmd)
+        process = subprocess.call(cmd)
+        if process == 0:
+            return True
+        else:
+            raise Exception('Creating mtm operation failed')
+
 def build_operators(dirpath, n_iterations):
     for i in range(n_iterations):
         window = dirpath+"window_"+str(i)+".win"
