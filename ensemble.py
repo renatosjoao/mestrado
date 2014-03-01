@@ -53,6 +53,7 @@ def train(xpl_data, n_features, n_iterations, dirpath):
 
     for i in range(n_iterations):
         indices, feature_list, _ = ft.cmim(Xdata, w0, w1, n_features)
+        indices = np.sort(indices)
         triosw.to_window_file(indices, xpl_data.winshape, dirpath+"window_"+str(i)+".win")
         triosw.to_image_file(indices,xpl_data.winshape, dirpath+"window_"+str(i)+".png", scale=8)
         total = float(np.sum([w0, w1]))
