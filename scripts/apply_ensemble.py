@@ -17,6 +17,7 @@ import ensemble
 import xplutil
 import feature as ft
 import trioswindow as tw
+import numpy as np
 
 #This script runs 1 iteration from the original algorithm
 #It saves a XPL file, a MTM file, an operator and applies the operator
