@@ -40,11 +40,15 @@ def main(trainset, window, nfeatures, image, savetodir):
     #applying the feature selection algorithm
     w0, w1, updated_decision, cls_error =  cl.apply_feature_selection(XPL_data, indices, w0, w1)
     #calculating the unique array and their indexes
+    indices = np.sort(indices)
     unique_array, unique_index = cl._apply_projection(XPL_data, indices)
     #writing a mimterm file to disk
     xplutil.write_minterm_file(savetodir+"mintermfile.mtm",indices, result.winshape, unique_array,updated_decision[unique_index])
     #building the operator based on the mintermfile
     ensemble.build_operator(savetodir+"window.win", savetodir+"mintermfile.mtm", savetodir+"operator")
+    #building a new XPL according to the learned window
+    output = savetodir+"Learned.xpl"
+    ensemble.build_xpl(trainset,savetodir+"window.win",output)
     result_img = savetodir+"Image_applied"
     #applying the operator on the image
     ensemble.apply_operator(savetodir+"operator", image, result_img)
