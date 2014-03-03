@@ -42,7 +42,7 @@ def main(trainset, window, nfeatures, niterations, image, savetodir):
         ensemble.apply_operator(savetodir+"mtm"+str(i)+"-op", image, savetodir+"mtm"+str(i)+"-op-files/image_processed")
 
     #applying the second level operator on the given image
-    ensemble.apply_operator(savetodir+"twoLevel-files/level1/operator0/operator",image, savetodir+"twoLevel-files/level1/operator0/image_processed")
+    ensemble.apply_operator(savetodir+"twoLevel",image, savetodir+"twoLevel-files/level1/operator0/image_processed")
 
     #Writing MAE from training set  to file
     imgset = imageset.Imageset()
