@@ -21,7 +21,7 @@ import trioswindow as tw
 import numpy as np
 import imageset
 
-def main(trainset, testset, window, nfeatures, niterations, image, savetodir):
+def main(trainset, testset, window, nfeatures, niterations, savetodir):
     output = savetodir+"temp.xpl"
     #building a XPL to start processing
     ensemble.build_xpl(trainset,window,output)
@@ -42,13 +42,33 @@ def main(trainset, testset, window, nfeatures, niterations, image, savetodir):
     #combining all the operators
     #ensemble.build_operator_combination(trainset, np.array(range(niterations)), savetodir, savetodir+"twoLevel")
 
-    #applying the first level operators on the given image
-    for i in range(niterations):
-        ensemble.apply_operator(savetodir+"mtm"+str(i)+"-op", image, savetodir+"mtm"+str(i)+"-op-files/image_processed")
+    #Writing MAE from training set  to file.
+    set = imageset.Imageset()
+    trainimgset = set.read(trainset)
+    mae_t = ensemble.generic_mae(trainimgset)
+    file = open(savetodir+"MAE_TrainingSet.txt", "w")
+    file.write(str(mae_t))
+    file.close()
 
-    #applying the second level operators combinations on the given image
+    #Writing MAE  from test set to file.
+    set = imageset.Imageset()
+    testimgset = set.read(testset)
+    mae_test = ensemble.generic_mae(testimgset)
+    file = open(savetodir+"MAE_TestSet.txt", "w")
+    file.write(str(mae_test))
+    file.close()
+
+    img_list = _get_imgList(testimgset)
+
+    #applying the first level operators on the test set images
+    for i in range(niterations):
+        for j in img_list:
+            ensemble.apply_operator(savetodir+"mtm"+str(i)+"-op", j, savetodir+"mtm"+str(i)+"-op-files/"+j.split("/")[-1])
+
+    #applying the second level operators combinations on the test set images
     for i in range(1,niterations):
-        ensemble.apply_operator(savetodir+"twoLevel_0_to_"+str(i),image, savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/image_processed")
+        for j in img_list:
+            ensemble.apply_operator(savetodir+"twoLevel_0_to_"+str(i),j, savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/"+j.split("/")[-1])
 
     #applying the second level operator on the given image
     #ensemble.apply_operator(savetodir+"twoLevel",image, savetodir+"twoLevel-files/level1/operator0/image_processed")
@@ -56,22 +76,17 @@ def main(trainset, testset, window, nfeatures, niterations, image, savetodir):
     # MAE_TrainingSet and MAE_TestSet are generic values. Consider as if the identity operator
     # had been applied to the images. It is only a reference value for improvement.
 
-    #Writing MAE from training set  to file.
-    imgset = imageset.Imageset()
-    set = imgset.read(trainset)
-    mae_t = ensemble.generic_mae(set)
-    file = open(savetodir+"MAE_TrainingSet.txt", "w")
-    file.write(str(mae_t))
-    file.close()
 
-    #Writing MAE  from test set to file.
-    imgset = imageset.Imageset()
-    set = imgset.read(testset)
-    mae_test = ensemble.generic_mae(set)
-    file = open(savetodir+"MAE_TestSet.txt", "w")
-    file.write(str(mae_test))
-    file.close()
-
+def _get_imgList(imageset):
+    """The ensemble needs a list of images to apply the operator.
+    The list is read from the test set file and the ideal images are discarded here.
+    It is only meant to return a list of input images to be processed by the operators.
+    """
+    img_list = []
+    num = len(imageset)
+    for i in range(num):
+        img_list.append(imageset[i][0])
+    return img_list
 
 if __name__ == "__main__":
      parser = argparse.ArgumentParser(description="Performs a single iteration of the ensemble and apply the operator on the given image.")
@@ -80,24 +95,27 @@ if __name__ == "__main__":
      parser.add_argument("-w", "--window", help="Window file path.")
      parser.add_argument("-n", "--nfeatures", type=int, help="The number of features to be selected.")
      parser.add_argument("-i", "--niterations", type=int, help="The number of iterations to run the ensemble training.")
-     parser.add_argument("-img", "--image", help="Image file to apply the operator." )
      parser.add_argument("-s", "--savetodir", help="Directory to save files.")
 
      args = parser.parse_args()
 
      if not args.trainset:
          print "Provide the training set. -tr --trainset"
+         raise Exception('Missing argument')
      if not args.testset:
          print "Provide the test set. -te --testset"
+         raise Exception('Missing argument')
      if not args.window:
          print "Provide the window file.  -w --window"
+         raise Exception('Missing argument')
      if not args.nfeatures:
          print "Provide the number of features to be selected.  -n --nfeatures"
+         raise Exception('Missing argument')
      if not args.niterations:
          print "Provide the number of iterations to run the ensemble algorithm.  -i --niterations"
-     if not args.image:
-         print "Provide image file to apply the operator.   -img --image"
+         raise Exception('Missing argument')
      if not args.savetodir:
          print "Provide directory to save files.  -s --savetodir"
+         raise Exception('Missing argument')
      else:
-        main(args.trainset, args.testset, args.window, args.nfeatures, args.niterations, args.image, args.savetodir)
+        main(args.trainset, args.testset, args.window, args.nfeatures, args.niterations, args.savetodir)
