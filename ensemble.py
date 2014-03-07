@@ -315,3 +315,23 @@ def apply_operator(operator_path, img_path, result_path, mask=''):
     if res != 0:
      raise Exception('Applying Image Operator Failed')
     return res
+
+def trios_test(operator_path, imgset_path):
+    """
+    Calculates the image operator MAE over a image set
+    operator_path : string
+            The operator path.
+    imgset_path : string
+            The imageset path on which the operator will be applied.
+    """
+
+    f = open(operator_path+"_stdout.txt", "w")
+    f2 = open("/dev/null", "w")
+    cmd = "trios_test %s %s" %(operator_path,imgset_path)
+    cmd = shlex.split(cmd)
+    res = subprocess.call(cmd,stdout=f, stderr=f2)
+    if res != 0:
+     raise Exception('Operation Failed')
+    f.close()
+    f2.close()
+    return res
