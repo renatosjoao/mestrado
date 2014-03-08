@@ -42,9 +42,10 @@ def make_windows(savetodir, winshape, m, n_windows):
     m is the number of pixels to be selected
     n_windows is the number of windows to save
     """
-    pixels = _get_indexes(m,winshape)
     for i in range(int(n_windows)):
+        pixels = _get_indexes(m,winshape)
         tw.to_window_file(pixels, winshape, savetodir+"window_"+str(i)+".win")
+        tw.to_image_file(pixels,winshape, savetodir+"window_"+str(i)+".png", scale=8)
     return 0
 
 #def make_operator_combination
@@ -102,7 +103,7 @@ if __name__ == "__main__":
         print "Provide the number of pixels to be selected. -n --npixels"
         raise Exception('Missing argument')
      if not args.winshape:
-        print "Provide the window shape (i.e 11,11 == 11x11 )."
+        print "Provide the window shape (i.e 11,11 == 11x11 ). -w --winshape"
         raise Exception('Missing argument')
      if not args.trainset:
         print "Provide the train set on which the operator will be trained. -tr --trainset"
