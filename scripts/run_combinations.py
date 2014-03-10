@@ -96,7 +96,7 @@ def main(numwindows, npixels, winshape, trainset, testset, savetodir):
     for i in range(1,int(numwindows)):
         print
         print "...Building operators combination : 0 to %s ... \n" %str(i)
-        build_operators_combination(trainset,  np.array(range(i)), savetodir, savetodir+"twoLevel_0_to_"+str(i))
+        build_operators_combination(trainset,  np.array(range(i+1)), savetodir, savetodir+"twoLevel_0_to_"+str(i))
 
     triostestset = imageset.Imageset()
     testimgset = triostestset.read(testset)
