@@ -33,11 +33,15 @@ def main(trainset, testset, window, nfeatures, niterations, savetodir):
     #training the ensemble
     ensemble.train(XPL_data, nfeatures, niterations, savetodir)
     #building first level operators
+    print
+    print "... Building first level operators ...\n"
     ensemble.build_operators(savetodir , niterations)
 
     #creating the operators combinations
     for i in range(1,niterations):
-        ensemble.build_operator_combination(trainset, np.array(range(i)), savetodir, savetodir+"twoLevel_0_to_"+str(i))
+        print
+        print "...Building operators combination : 0 to %s ... \n" %str(i)
+        ensemble.build_operator_combination(trainset, np.array(range(i+1)), savetodir, savetodir+"twoLevel_0_to_"+str(i))
 
     #combining all the operators
     #ensemble.build_operator_combination(trainset, np.array(range(niterations)), savetodir, savetodir+"twoLevel")
