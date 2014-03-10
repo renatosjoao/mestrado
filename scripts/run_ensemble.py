@@ -74,7 +74,7 @@ def main(trainset, testset, window, nfeatures, niterations, savetodir):
     for i in range(1,niterations):
         for j in img_list:
             ensemble.apply_operator(savetodir+"twoLevel_0_to_"+str(i),j, savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/"+j.split("/")[-1][:-3]+"proc.pnm")
-    ensemble.trios_test(savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/operator", testset, savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/MAE.txt")
+        ensemble.trios_test(savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/operator", testset, savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/MAE.txt")
 
     #applying the second level operator on the given image
     #ensemble.apply_operator(savetodir+"twoLevel",image, savetodir+"twoLevel-files/level1/operator0/image_processed")
