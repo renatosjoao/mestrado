@@ -45,7 +45,7 @@ def main(trainset, testset, window, nfeatures, niterations, savetodir):
     #Writing MAE from training set  to file.
     set = imageset.Imageset()
     trainimgset = set.read(trainset)
-    mae_t = ensemble.generic_mae(trainimgset)
+    mae_t = ensemble.mae(trainimgset)
     file = open(savetodir+"MAE_TrainingSet.txt", "w")
     file.write(str(mae_t))
     file.close()
@@ -53,7 +53,7 @@ def main(trainset, testset, window, nfeatures, niterations, savetodir):
     #Writing MAE  from test set to file.
     set = imageset.Imageset()
     testimgset = set.read(testset)
-    mae_test = ensemble.generic_mae(testimgset)
+    mae_test = ensemble.mae(testimgset)
     file = open(savetodir+"MAE_TestSet.txt", "w")
     file.write(str(mae_test))
     file.close()
