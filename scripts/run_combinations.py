@@ -19,6 +19,7 @@ import numpy as np
 import random
 import subprocess
 import shlex
+import imageset
 
 def _get_indexes(num_pixels, winshape):
     """ a function to return indexes randomly selected
@@ -48,7 +49,17 @@ def make_windows(savetodir, winshape, m, n_windows):
         tw.to_image_file(pixels,winshape, savetodir+"window_"+str(i)+".png", scale=8)
     return 0
 
-#def make_operator_combination
+def _get_imgList(imageset):
+    """The ensemble needs a list of images to apply the operator.
+    The list is read from the test set file and the ideal images are discarded here.
+    It is only meant to return a list of input images to be processed by the operators.
+    """
+    img_list = []
+    num = len(imageset)
+    for i in range(num):
+        img_list.append(imageset[i][0])
+    return img_list
+
 def build_operator(win, imgset,fname):
     """ This function is meant to build first level operators
     win - window file path
@@ -74,13 +85,38 @@ def build_operators_combination(imgset, op_to_combine, op_dir, fname):
 def main(numwindows, npixels, winshape, trainset, testset, savetodir):
     winshape = tuple((int(winshape[:2]),int(winshape[3:])))
     make_windows(savetodir, winshape, npixels, numwindows)
+
     #this is where i run the single level operators training
     for i in range(int(numwindows)):
+        print
+        print "...Building operator %s ...\n" %str(i)
         build_operator(savetodir+"window_"+str(i)+".win", trainset, savetodir+"window_"+str(i)+"_op")
+
     #this is where i combine the single level operators to create a second level one
-    build_operators_combination(trainset,  np.array(range(int(numwindows))), savetodir, savetodir+"twoLevel")
-    operator_path = savetodir+"twoLevel"
-    ensemble.trios_test(operator_path, testset)
+    for i in range(1,int(numwindows)):
+        print
+        print "...Building operators combination : 0 to %s ... \n" %str(i)
+        build_operators_combination(trainset,  np.array(range(i)), savetodir, savetodir+"twoLevel_0_to_"+str(i))
+
+    triostestset = imageset.Imageset()
+    testimgset = triostestset.read(testset)
+    img_list = _get_imgList(testimgset)
+
+    #applying the first level operators on the test set images
+    for i in range(int(numwindows)):
+        for j in img_list:
+            print
+            print "...Applying operator %s on image : %s ...\n" %(str(i),j)
+            ensemble.apply_operator(savetodir+"window_"+str(i)+"_op", j, savetodir+"window_"+str(i)+"_op-files/"+j.split("/")[-1][:-3]+"proc.pnm")
+        ensemble.trios_test(savetodir+"window_"+str(i)+"_op-files/operator", testset, savetodir+"window_"+str(i)+"_op-files/MAE.txt")
+
+    #applying the second level operators combinations on the test set images
+    for i in range(1,int(numwindows)):
+        for j in img_list:
+            ensemble.apply_operator(savetodir+"twoLevel_0_to_"+str(i),j, savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/"+j.split("/")[-1][:-3]+"proc.pnm")
+        #running trios_test tool to calculate MAE for current operator combination
+        ensemble.trios_test(savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/operator", testset, savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/MAE.txt")
+
     return 0
 
 if __name__ == "__main__":
