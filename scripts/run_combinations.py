@@ -108,14 +108,14 @@ def main(numwindows, npixels, winshape, trainset, testset, savetodir):
             print
             print "...Applying operator %s on image : %s ...\n" %(str(i),j)
             ensemble.apply_operator(savetodir+"window_"+str(i)+"_op", j, savetodir+"window_"+str(i)+"_op-files/"+j.split("/")[-1][:-3]+"proc.pnm")
-        ensemble.trios_test(savetodir+"window_"+str(i)+"_op-files/operator", testset, savetodir+"window_"+str(i)+"_op-files/MAE.txt")
+        ensemble.trios_test(savetodir+"window_"+str(i)+"_op", testset, savetodir+"window_"+str(i)+"_op-files/MAE.txt")
 
     #applying the second level operators combinations on the test set images
     for i in range(1,int(numwindows)):
         for j in img_list:
             ensemble.apply_operator(savetodir+"twoLevel_0_to_"+str(i),j, savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/"+j.split("/")[-1][:-3]+"proc.pnm")
         #running trios_test tool to calculate MAE for current operator combination
-        ensemble.trios_test(savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/operator", testset, savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/MAE.txt")
+        ensemble.trios_test(savetodir+"twoLevel_0_to_"+str(i), testset, savetodir+"twoLevel_0_to_"+str(i)+"-files/level1/operator0/MAE.txt")
 
     return 0
 
