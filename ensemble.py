@@ -316,7 +316,7 @@ def apply_operator(operator_path, img_path, result_path, mask=''):
      raise Exception('Applying Image Operator Failed')
     return res
 
-def trios_test(operator_path, imgset_path):
+def trios_test(operator_path, imgset_path, output):
     """
     Calculates the image operator MAE over a image set
     operator_path : string
@@ -325,7 +325,7 @@ def trios_test(operator_path, imgset_path):
             The imageset path on which the operator will be applied.
     """
 
-    f = open(operator_path+"_stdout.txt", "w")
+    f = open(output, "w")
     f2 = open("/dev/null", "w")
     cmd = "trios_test %s %s" %(operator_path,imgset_path)
     cmd = shlex.split(cmd)
