@@ -95,7 +95,7 @@ def _get_imgList(imageset):
     return img_list
 
 if __name__ == "__main__":
-     parser = argparse.ArgumentParser(description="Performs a single iteration of the ensemble and apply the operator on the given image.")
+     parser = argparse.ArgumentParser(description="Performs n iterations of the ensemble and apply the operator on the given image.")
      parser.add_argument("-tr", "--trainset", help="Training set file path.")
      parser.add_argument("-te", "--testset", help="Test set file path.")
      parser.add_argument("-w", "--window", help="Window file path.")
