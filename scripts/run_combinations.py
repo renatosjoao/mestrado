@@ -83,17 +83,19 @@ def build_operators_combination(imgset, op_to_combine, op_dir, fname):
     return process
 
 def main(numwindows, npixels, winshape, trainset, testset, savetodir):
-    winshape = tuple((int(winshape[:2]),int(winshape[3:])))
-    make_windows(savetodir, winshape, npixels, numwindows)
+    winshape = winshape.split("x")
+    height = int(winshape[0])
+    width = int(winshape[1])
+    make_windows(savetodir, (height,width), npixels, numwindows)
 
     #this is where i run the single level operators training
-    for i in range(int(numwindows)):
+    for i in range(numwindows):
         print
         print "...Building operator %s ...\n" %str(i)
         build_operator(savetodir+"window_"+str(i)+".win", trainset, savetodir+"window_"+str(i)+"_op")
 
     #this is where i combine the single level operators to create a second level one
-    for i in range(1,int(numwindows)):
+    for i in range(1,numwindows):
         print
         print "...Building operators combination : 0 to %s ... \n" %str(i)
         build_operators_combination(trainset,  np.array(range(i+1)), savetodir, savetodir+"twoLevel_0_to_"+str(i))
@@ -103,7 +105,7 @@ def main(numwindows, npixels, winshape, trainset, testset, savetodir):
     img_list = _get_imgList(testimgset)
 
     #applying the first level operators on the test set images
-    for i in range(int(numwindows)):
+    for i in range(numwindows):
         for j in img_list:
             print
             print "...Applying operator %s on image : %s ...\n" %(str(i),j)
@@ -121,9 +123,9 @@ def main(numwindows, npixels, winshape, trainset, testset, savetodir):
 
 if __name__ == "__main__":
      parser = argparse.ArgumentParser(description="Performs experiment for randomly selected pixels.")
-     parser.add_argument("-m", "--numwindows", help="Number of windows.")
+     parser.add_argument("-m", "--numwindows", type=int, help="Number of windows.")
      parser.add_argument("-n", "--npixels", type=int, help="The number of pixels from a window.")
-     parser.add_argument("-w", "--winshape", help="Window shape, i.e. 11,11 == 11x11")
+     parser.add_argument("-w", "--winshape", help="Window shape, i.e. 11x11")
      parser.add_argument("-tr", "--trainset", help="Training set file path.")
      parser.add_argument("-te", "--testset", help="Test set file path.")
      parser.add_argument("-s", "--savetodir", help="Directory to save files.")
