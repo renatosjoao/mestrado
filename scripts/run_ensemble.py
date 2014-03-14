@@ -21,10 +21,10 @@ import trioswindow as tw
 import numpy as np
 import imageset
 
-def main(trainset, testset, window, nfeatures, niterations, savetodir):
+def main(level1trainset,level2trainset, testset, window, nfeatures, niterations, savetodir):
     output = savetodir+"temp.xpl"
     #building a XPL to start processing
-    ensemble.build_xpl(trainset,window,output)
+    ensemble.build_xpl(level1trainset,window,output)
     XPL_filepath = output
     #now let's read the XPL
     XPL_data = xplutil.read_xpl(XPL_filepath)
@@ -41,14 +41,14 @@ def main(trainset, testset, window, nfeatures, niterations, savetodir):
     for i in range(1,niterations):
         print
         print "...Building operators combination : 0 to %s ... \n" %str(i)
-        ensemble.build_operator_combination(trainset, np.array(range(i+1)), savetodir, savetodir+"twoLevel_0_to_"+str(i))
+        ensemble.build_operator_combination(level2trainset, np.array(range(i+1)), savetodir, savetodir+"twoLevel_0_to_"+str(i))
 
     #combining all the operators
     #ensemble.build_operator_combination(trainset, np.array(range(niterations)), savetodir, savetodir+"twoLevel")
 
     #Writing MAE from training set  to file.
     set = imageset.Imageset()
-    trainimgset = set.read(trainset)
+    trainimgset = set.read(level1trainset)
     mae_t = ensemble.mae(trainimgset)
     file = open(savetodir+"MAE_TrainingSet.txt", "w")
     file.write(str(mae_t))
@@ -96,8 +96,9 @@ def _get_imgList(imageset):
 
 if __name__ == "__main__":
      parser = argparse.ArgumentParser(description="Performs n iterations of the ensemble and apply the operator on the given image.")
-     parser.add_argument("-tr", "--trainset", help="Training set file path.")
-     parser.add_argument("-te", "--testset", help="Test set file path.")
+     parser.add_argument("-l1", "--level1trainset", help="Leve 1 training set file path.")
+     parser.add_argument("-l2", "--level2trainset", help="Level 2 training set file path.")
+     parser.add_argument("-t", "--testset", help="Test set file path.")
      parser.add_argument("-w", "--window", help="Window file path.")
      parser.add_argument("-n", "--nfeatures", type=int, help="The number of features to be selected.")
      parser.add_argument("-i", "--niterations", type=int, help="The number of iterations to run the ensemble training.")
@@ -105,11 +106,14 @@ if __name__ == "__main__":
 
      args = parser.parse_args()
 
-     if not args.trainset:
-         print "Provide the training set. -tr --trainset"
+     if not args.level1trainset:
+         print "Provide the training set for the first level operators. -l1 --level1trainset"
+         raise Exception('Missing argument')
+     if not args.level2trainset:
+         print "Provide the training set for the second level operators. -l2 --level2trainset"
          raise Exception('Missing argument')
      if not args.testset:
-         print "Provide the test set. -te --testset"
+         print "Provide the test set. -t --testset"
          raise Exception('Missing argument')
      if not args.window:
          print "Provide the window file.  -w --window"
@@ -124,4 +128,4 @@ if __name__ == "__main__":
          print "Provide directory to save files.  -s --savetodir"
          raise Exception('Missing argument')
      else:
-        main(args.trainset, args.testset, args.window, args.nfeatures, args.niterations, args.savetodir)
+        main(args.level1trainset, args.level2trainset, args.testset, args.window, args.nfeatures, args.niterations, args.savetodir)
