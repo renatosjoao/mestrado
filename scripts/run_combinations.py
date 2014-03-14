@@ -82,7 +82,7 @@ def build_operators_combination(imgset, op_to_combine, op_dir, fname):
      raise Exception('Operation Failed')
     return process
 
-def main(numwindows, npixels, winshape, trainset, testset, savetodir):
+def main(numwindows, npixels, winshape, level1trainset, level2trainset, testset, savetodir):
     winshape = winshape.split("x")
     height = int(winshape[0])
     width = int(winshape[1])
@@ -92,13 +92,13 @@ def main(numwindows, npixels, winshape, trainset, testset, savetodir):
     for i in range(numwindows):
         print
         print "...Building operator %s ...\n" %str(i)
-        build_operator(savetodir+"window_"+str(i)+".win", trainset, savetodir+"window_"+str(i)+"_op")
+        build_operator(savetodir+"window_"+str(i)+".win", level1trainset, savetodir+"window_"+str(i)+"_op")
 
     #this is where i combine the single level operators to create a second level one
     for i in range(1,numwindows):
         print
         print "...Building operators combination : 0 to %s ... \n" %str(i)
-        build_operators_combination(trainset,  np.array(range(i+1)), savetodir, savetodir+"twoLevel_0_to_"+str(i))
+        build_operators_combination(level2trainset,  np.array(range(i+1)), savetodir, savetodir+"twoLevel_0_to_"+str(i))
 
     triostestset = imageset.Imageset()
     testimgset = triostestset.read(testset)
@@ -126,8 +126,9 @@ if __name__ == "__main__":
      parser.add_argument("-m", "--numwindows", type=int, help="Number of windows.")
      parser.add_argument("-n", "--npixels", type=int, help="The number of pixels from a window.")
      parser.add_argument("-w", "--winshape", help="Window shape, i.e. 11x11")
-     parser.add_argument("-tr", "--trainset", help="Training set file path.")
-     parser.add_argument("-te", "--testset", help="Test set file path.")
+     parser.add_argument("-l1", "--level1trainset", help="Level 1 training set file path.")
+     parser.add_argument("-l2", "--level2trainset", help="Level 2 training set file path.")
+     parser.add_argument("-t", "--testset", help="Test set file path.")
      parser.add_argument("-s", "--savetodir", help="Directory to save files.")
      args = parser.parse_args()
 
@@ -143,14 +144,17 @@ if __name__ == "__main__":
      if not args.winshape:
         print "Provide the window shape (i.e 11,11 == 11x11 ). -w --winshape"
         raise Exception('Missing argument')
-     if not args.trainset:
-        print "Provide the train set on which the operator will be trained. -tr --trainset"
+     if not args.level1trainset:
+        print "Provide the train set on which the first level operators will be trained. -l1 --level1trainset"
+        raise Exception('Missing argument')
+     if not args.level2trainset:
+        print "Provide the train set on which the seconde level operator will be trained. -l2 --level2trainset"
         raise Exception('Missing argument')
      if not args.testset:
-        print "Provide the test set on which the operator will be applied. -te --testset"
+        print "Provide the test set on which the operator will be applied. -t --testset"
         raise Exception('Missing argument')
      if not args.savetodir:
         print "Provide the directory to save the files. -s --savetodir"
         raise Exception('Missing argument')
 
-     main(args.numwindows, args.npixels, args.winshape, args.trainset, args.testset, args.savetodir)
+     main(args.numwindows, args.npixels, args.winshape, args.level1trainset, args.level2trainset, args.testset, args.savetodir)
